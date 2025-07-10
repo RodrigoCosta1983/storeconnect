@@ -1,9 +1,3 @@
-Com certeza. Criar um bom `README.md` é fundamental para qualquer projeto no GitHub. Ele serve como o cartão de visitas, explicando o propósito, a tecnologia e o status do seu trabalho.
-
-Preparei um `README.md` completo e formal, utilizando o formato Markdown, que você pode simplesmente copiar e colar em um arquivo chamado `README.md` na raiz do seu projeto.
-
------
-
 # Gelo Gestor - Sistema de Gestão para Distribuidoras
 
 ## 📖 Sobre o Projeto
