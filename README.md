@@ -88,8 +88,8 @@ Este protótipo é a base para a versão final do aplicativo. Os próximos passo
 
 **Rodrigo Costa DEV**
 
-  * GitHub: `[[@RodrigoCosta1983]((https://github.com/RodrigoCosta1983))`
-  * LinkedIn: `[Rodrigo Costa DEV](https://www.linkedin.com/in/dev-rodrigo-costa/)`
+  * GitHub: [@RodrigoCosta1983](https://github.com/RodrigoCosta1983)
+  * LinkedIn: [Rodrigo Costa DEV](https://www.linkedin.com/in/dev-rodrigo-costa/)
 
 -----
 
