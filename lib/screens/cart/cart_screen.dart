@@ -5,6 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:tienda_model/widgets/payment_options_sheet.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/cart_item_widget.dart';
+<<<<<<< HEAD
+=======
+import '../../widgets/payment_options_sheet.dart';
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart'; // Usaremos para navegação futura

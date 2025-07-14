@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+<<<<<<< HEAD
 
 // 1. Importe os pacotes do Firebase
 import 'package:firebase_core/firebase_core.dart';
@@ -22,6 +23,18 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+=======
+// Importe a nova tela
+import 'package:tienda_model/providers/cart_provider.dart';
+import 'package:tienda_model/screens/login/login_screen.dart';
+import 'package:tienda_model/screens/sales/new_sale_screen.dart';
+import 'package:tienda_model/themes/app_theme.dart';
+
+import 'providers/cash_flow_provider.dart';
+import 'providers/sales_provider.dart';
+
+void main() {
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
   runApp(const MyApp());
 }
 
@@ -30,6 +43,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
+=======
+    // Usamos o MultiProvider para gerenciar múltiplos providers
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (ctx) => CartProvider()),

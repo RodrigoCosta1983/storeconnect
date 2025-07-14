@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
+<<<<<<< HEAD
         android:label="Gelo Gestor"
+=======
+        android:label="tienda_model"
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

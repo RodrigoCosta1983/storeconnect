@@ -121,8 +121,12 @@ class _OrderItemWidgetState extends State<OrderItemWidget> {
                           foregroundColor: Colors.white,
                         ),
                         onPressed: () {
+<<<<<<< HEAD
                           // Agora passamos também o valor do pedido
                           salesProvider.markOrderAsPaid(widget.order.id, widget.order.amount, cashFlowProvider);
+=======
+                          salesProvider.markOrderAsPaid(widget.order.id, cashFlowProvider);
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
                         },
                       ),
                     ),
