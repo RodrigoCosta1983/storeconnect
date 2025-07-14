@@ -106,6 +106,10 @@ flutter_lints
 3.5
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-5.0.0/
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-5.0.0/lib/
+http
+3.4
+file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.4.0/
+file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.4.0/lib/
 http_parser
 3.4
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.2/
@@ -154,6 +158,14 @@ nested
 2.12
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0/
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0/lib/
+package_info_plus
+3.3
+file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus-8.3.0/
+file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus-8.3.0/lib/
+package_info_plus_platform_interface
+2.18
+file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus_platform_interface-3.2.0/
+file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus_platform_interface-3.2.0/lib/
 path
 3.4
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/path-1.9.1/
@@ -246,6 +258,10 @@ web
 3.4
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/web-1.1.1/
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/web-1.1.1/lib/
+win32
+3.8
+file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.14.0/
+file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.14.0/lib/
 xml
 3.2
 file:///C:/Users/rodri/AppData/Local/Pub/Cache/hosted/pub.dev/xml-6.5.0/
