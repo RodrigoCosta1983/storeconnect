@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+<<<<<<< HEAD
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+=======
+import 'package:tienda_model/screens/sales/sales_history_screen.dart';
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
 import '../../models/product_model.dart';
 import '../../providers/cart_provider.dart';
 import '../cart/cart_screen.dart';
 import '../dashboard/dashboard_screen.dart';
+<<<<<<< HEAD
 import '../management/manage_customers_screen.dart';
 import '../management/manage_products_screen.dart';
 import '../sales/sales_history_screen.dart';
@@ -49,6 +54,20 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
       throw 'Não foi possível abrir $url';
     }
   }
+=======
+// TODO: Criar a tela do carrinho: import '../cart/cart_screen.dart';
+
+class NewSaleScreen extends StatelessWidget {
+  NewSaleScreen({super.key});
+
+  // Dados de exemplo (no futuro, virão de um banco de dados)
+  final List<Product> loadedProducts = [
+    Product(id: 'p1', name: 'Gelo em Cubo 5kg', price: 10.00, imageUrl: 'assets/images/gelo_saco.jpg'),
+    Product(id: 'p2', name: 'Gelo em Cubo 10kg', price: 18.00, imageUrl: 'assets/images/gelo_saco.jpg'),
+    Product(id: 'p3', name: 'Barra de Gelo 5kg', price: 12.00, imageUrl: 'assets/images/gelo_barra.jpg'),
+    Product(id: 'p4', name: 'Gelo Moído 5kg', price: 11.00, imageUrl: 'assets/images/gelo_saco.jpg'),
+  ];
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +75,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
       appBar: AppBar(
         title: const Text('Nova Venda'),
         actions: [
+<<<<<<< HEAD
           Consumer<CartProvider>(
             builder: (context, cart, _) => Badge(
               label: Text(cart.itemCount.toString()),
@@ -68,6 +88,23 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                   );
                 },
               ),
+=======
+          // Ícone do Carrinho com Badge
+          Consumer<CartProvider>(
+            builder: (_, cart, ch) => Badge(
+              label: Text(cart.itemCount.toString()),
+              isLabelVisible: cart.itemCount > 0,
+              child: ch,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                // TODO: Navegar para a tela do carrinho
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (ctx) => const CartScreen()),
+                );
+              },
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
             ),
           ),
         ],
@@ -77,14 +114,31 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
           padding: EdgeInsets.zero,
           children: [
             const DrawerHeader(
+<<<<<<< HEAD
               decoration: BoxDecoration(color: Colors.blue),
               child: Text('Gelo Gestor', style: TextStyle(color: Colors.white, fontSize: 24)),
+=======
+              decoration: BoxDecoration(
+                color: Colors.blue, // Use a cor primária do seu tema
+              ),
+              child: Text(
+                'Gelo Gestor',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
             ),
             ListTile(
               leading: const Icon(Icons.dashboard),
               title: const Text('Dashboard'),
               onTap: () {
+<<<<<<< HEAD
                 Navigator.of(context).pop();
+=======
+                Navigator.of(context).pop(); // Fecha o drawer
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (ctx) => const DashboardScreen()),
                 );
@@ -94,12 +148,17 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               leading: const Icon(Icons.history),
               title: const Text('Histórico de Vendas'),
               onTap: () {
+<<<<<<< HEAD
                 Navigator.of(context).pop();
+=======
+                Navigator.of(context).pop(); // Fecha o drawer
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (ctx) => const SalesHistoryScreen()),
                 );
               },
             ),
+<<<<<<< HEAD
             const Divider(),
             ListTile(
               leading: const Icon(Icons.inventory_2),
@@ -175,19 +234,26 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                 );
               },
             ),
+=======
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Sair'),
               onTap: () {
+<<<<<<< HEAD
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
                       (Route<dynamic> route) => false,
                 );
+=======
+                // TODO: Implementar lógica de logout
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
               },
             ),
           ],
         ),
       ),
+<<<<<<< HEAD
 
 
       body: StreamBuilder<QuerySnapshot>(
@@ -283,6 +349,73 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
             },
           );
         },
+=======
+      body: GridView.builder(
+
+        padding: const EdgeInsets.all(10.0),
+        itemCount: loadedProducts.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, // 2 colunas
+          childAspectRatio: 3 / 4, // Proporção do card
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemBuilder: (ctx, i) => Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          clipBehavior: Clip.antiAlias, // Para cortar a imagem nos cantos arredondados
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(
+                child: Image.asset(
+                  loadedProducts[i].imageUrl,
+                  fit: BoxFit.cover,
+                  // Em caso de erro ao carregar a imagem
+                  errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.ac_unit, size: 50)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  loadedProducts[i].name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  'R\$ ${loadedProducts[i].price.toStringAsFixed(2)}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.add_shopping_cart, size: 18),
+                  label: const Text('Adicionar'),
+                  onPressed: () {
+                    // Adiciona o item ao carrinho sem 'ouvir' por atualizações aqui
+                    Provider.of<CartProvider>(context, listen: false).addItem(loadedProducts[i]);
+                    // Mostra uma confirmação rápida
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                    // Mostra a nova SnackBar informativa, que fechará em 2 segundos
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${loadedProducts[i].name} adicionado ao carrinho!'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+>>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
       ),
     );
   }
