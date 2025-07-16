@@ -1,109 +1,92 @@
- 
-========================================
-**Manual do Usuário: Gelo Gestor**
-========================================
+# Gelo Gestor - Sistema de Gestão para Distribuidoras
 
-**Versão 1.0 | Julho de 2025**
+![Flutter](https://img.shields.io/badge/Framework-Flutter-02569B?style=for-the-badge&logo=flutter)
+![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?style=for-the-badge&logo=firebase)
+![Dart](https://img.shields.io/badge/Language-Dart-0175C2?style=for-the-badge&logo=dart)
+![Status](https://img.shields.io/badge/Status-V1.0-green?style=for-the-badge)
 
-*Seu Guia Rápido para uma Gestão Eficiente*
+## 📖 Sobre o Projeto
 
----
+**Gelo Gestor** é um aplicativo móvel completo, construído com Flutter e Firebase, que serve como uma solução de gestão de ponta a ponta para distribuidoras de gelo. O projeto foi concebido para digitalizar e otimizar operações diárias, substituindo controles manuais por um sistema centralizado, reativo e acessível.
 
-**1. Introdução**
-
-Bem-vindo ao Gelo Gestor!
-
-Este manual foi criado para guiá-lo através de todas as funcionalidades do seu novo aplicativo de gestão. O Gelo Gestor foi projetado para ser uma ferramenta poderosa e intuitiva, simplificando o controle de suas vendas, clientes e finanças, permitindo que você se concentre no que mais importa: o crescimento do seu negócio.
+O principal objetivo é fornecer ao proprietário do negócio uma ferramenta poderosa para gerenciar vendas, clientes e finanças, com um foco especializado no controle de vendas a prazo (fiado), uma das maiores dores do setor.
 
 ---
 
-**2. Primeiros Passos**
+## ✨ Funcionalidades Implementadas
 
-Para começar a usar o aplicativo, o primeiro passo é acessar sua conta.
+A versão atual do aplicativo é um produto funcional completo, com dados persistidos na nuvem e uma arquitetura robusta.
 
-**2.1. Criando uma Conta e Fazendo Login**
+#### 🔑 **Autenticação & Segurança**
+* **Sistema de Login Completo:** Autenticação segura de usuários com E-mail e Senha via **Firebase Authentication**.
+* **Registro de Novos Usuários:** Fluxo de criação de conta direto no aplicativo com validação de dados.
+* **Gerenciamento de Sessão:** Lógica de "Sair" que limpa o estado de navegação e retorna à tela de login de forma segura.
 
-Ao abrir o aplicativo pela primeira vez, você verá a tela de login.
+#### 📊 **Dashboard & Análise de Dados**
+* **Painel de Controle Interativo:** Dashboard com métricas de negócio em tempo real (Vendas do Período, Caixa, Contas a Receber, Contas Vencidas).
+* **Filtros de Período:** Análise de performance de vendas com filtros por **Hoje, Semana e Mês**.
+* **Gráficos Dinâmicos:** Visualização de dados de vendas em gráficos de barra para análises semanais e mensais.
+* **Navegação por Atalhos:** Cards da dashboard que funcionam como atalhos para listas pré-filtradas no histórico, otimizando o fluxo de trabalho do usuário.
 
-* Para se registrar: Clique no link "Não tem uma conta? Registre-se". Preencha seu e-mail e crie uma senha segura (mínimo de 6 caracteres). Clique em "REGISTRAR".
-* Para fazer login: Insira o e-mail e a senha que você cadastrou e clique em "ENTRAR".
+#### 📦 **Gestão de Dados (CRUD Completo)**
+* **Gerenciamento de Produtos:** Tela dedicada para Criar, Ler, Editar e Excluir produtos, com dados persistidos no Firestore.
+* **Gerenciamento de Clientes:** Tela dedicada para Criar, Ler, Editar e Excluir clientes.
+* **Busca Inteligente:** Funcionalidade de busca *case-insensitive* em tempo real para encontrar produtos e clientes rapidamente.
 
-**2.2. Navegação Principal**
+#### 💰 **Fluxo de Venda e Financeiro**
+* **Ponto de Venda (PDV) Reativo:** Tela de "Nova Venda" que lê o catálogo de produtos em tempo real do Firestore.
+* **Gestão de Vendas "Fiado":** Fluxo completo para vendas a prazo, com seleção de clientes do banco de dados e definição de data de vencimento.
+* **Controle de Pagamentos:** Funcionalidade para **marcar uma conta como paga**, que atualiza o status da venda no Firestore e credita o valor ao caixa do aplicativo.
+* **Histórico de Vendas Detalhado:** Lista de todas as vendas salvas no Firestore, com filtros e detalhes expansíveis.
+* **Alertas Visuais:** O histórico destaca automaticamente vendas vencidas e não pagas com ícones e cores de alerta para facilitar a cobrança.
 
-Após o login, você chegará à tela de "Nova Venda". Para acessar outras áreas do aplicativo, clique no ícone de menu (☰) no canto superior esquerdo. Isso abrirá o menu lateral com as seguintes opções:
-
-* Dashboard: Sua central de controle com as principais métricas do negócio.
-* Histórico de Vendas: Lista de todas as vendas realizadas.
-* Gerenciar Produtos: Para adicionar ou editar os itens que você vende.
-* Gerenciar Clientes: Para cadastrar e administrar seus clientes de vendas a prazo.
-* Sobre: Informações sobre o aplicativo e o desenvolvedor.
-* Sair: Para encerrar sua sessão com segurança.
-
----
-
-**3. O Dia a Dia: Operações**
-
-Estas são as funcionalidades que você mais usará no cotidiano.
-
-**3.1. Realizando uma Venda**
-
-A tela inicial já é o seu Ponto de Venda (PDV).
-
-1.  Selecione os Produtos: A tela exibe seu catálogo de produtos. Toque no botão "+ Adicionar" no card do produto desejado.
-2.  Acesse o Carrinho: O ícone de carrinho de compras (🛒) no canto superior direito mostrará um número indicando quantos tipos de itens estão no carrinho. Clique nele para ver os detalhes.
-3.  Ajuste as Quantidades: Na tela do carrinho, você pode usar os botões `+` e `-` para alterar a quantidade de cada produto ou arrastar o item para a esquerda para excluí-lo.
-4.  Finalize a Venda: Após confirmar os itens e o valor total, clique em "FINALIZAR VENDA".
-
-**3.2. Vendas "Fiado" (A Prazo)**
-
-Ao finalizar uma venda, um painel com as opções de pagamento aparecerá.
-
-1.  Escolha a Opção: Selecione a opção "Fiado / A Prazo".
-2.  Selecione o Cliente: Uma caixa de diálogo aparecerá com a sua lista de clientes cadastrados. Selecione o cliente que está fazendo a compra.
-3.  Confirme os Detalhes: Um segundo pop-up de confirmação aparecerá.
-4.  Escolha a Data: Clique em "Escolher Data" para abrir um calendário e selecionar a data de vencimento combinada para o pagamento.
-5.  Confirme a Venda: Clique em "Confirmar Venda". A venda será registrada e a dívida atribuída ao cliente.
+#### 🎨 **Experiência do Usuário (UI/UX)**
+* **Suporte a Temas:** Interface totalmente adaptável para **Modo Claro** e **Modo Escuro**.
+* **Design Consistente:** Fundos personalizados e elementos de UI que se adaptam ao tema para uma experiência visual coesa.
+* **Feedback ao Usuário:** Uso de indicadores de carregamento, `SnackBar`s para confirmação e diálogos de alerta para operações críticas (como exclusão).
 
 ---
 
-**4. Análise e Controle**
+## 🛠️ Como Foi Construído? (Tecnologias e Arquitetura)
 
-Gerencie a saúde do seu negócio com as ferramentas de análise.
+O aplicativo foi desenvolvido com uma stack de tecnologias modernas, focada em performance, escalabilidade e uma experiência de desenvolvimento ágil.
 
-**4.1. Dashboard (Painel de Controle)**
-
-Acesse a Dashboard pelo menu lateral para ter uma visão geral do seu negócio.
-
-* Filtros de Período: No topo, você pode alternar a visualização de Vendas entre Hoje, Semana e Mês.
-* Cards Interativos: Os cards de "Vendas", "Contas a Receber" e "Contas Vencidas" são clicáveis e servem como atalhos para as listas detalhadas e gráficos.
-* Caixa Atual: Mostra o saldo de caixa, que aumenta quando uma conta "fiado" é marcada como paga.
-
-**4.2. Histórico de Vendas**
-
-Esta tela lista todas as vendas realizadas.
-
-* Ícones de Status:
-    * (Check Verde) ✅: A venda foi paga.
-    * (Alerta Vermelho) ⚠️: A venda está vencida e não foi paga.
-    * (Documento Cinza) 📄: A venda está pendente, mas ainda não venceu.
-* Ver Detalhes: Toque em qualquer venda para expandir e ver os produtos comprados e a data de vencimento.
-
-**4.3. Marcando uma Conta como Paga**
-
-1.  Vá para o Histórico de Vendas.
-2.  Encontre a venda "fiado" pendente e toque nela para expandir os detalhes.
-3.  Clique no botão verde "Marcar como Pago".
-4.  O status da venda mudará para "pago" e o valor será somado ao seu "Caixa Atual" na Dashboard.
+* **Framework Principal:** **[Flutter](https://flutter.dev/)** - Para uma interface de usuário compilada nativamente, garantindo performance e consistência visual em Android e iOS a partir de uma única base de código.
+* **Linguagem de Programação:** **[Dart](https://dart.dev/)** - Com todos os recursos de segurança de tipos (Sound Null Safety).
+* **Backend (BaaS - Backend as a Service):** **[Firebase](https://firebase.google.com/)**
+    * **Autenticação:** **Firebase Authentication** para gerenciar o ciclo de vida dos usuários.
+    * **Banco de Dados:** **Cloud Firestore** como nosso banco de dados NoSQL, em tempo real e escalável, para armazenar todos os dados da aplicação.
+* **Gerenciamento de Estado:** **[Provider](https://pub.dev/packages/provider)** - Escolhido por sua simplicidade e poder para gerenciar o estado da aplicação de forma reativa e organizada.
+* **UI Reativa:** O aplicativo foi construído em torno do widget **`StreamBuilder`**, permitindo que a interface reaja e se atualize instantaneamente a qualquer mudança nos dados do Firestore, sem a necessidade de recarregar a tela manualmente.
+* **Bibliotecas Adicionais Notáveis:**
+    * **`fl_chart`**: Para a criação dos gráficos dinâmicos e interativos na Dashboard.
+    * **`intl`**: Para formatação de datas e valores monetários seguindo padrões locais.
+    * **`package_info_plus`** e **`url_launcher`**: Para funcionalidades adicionais de UI.
 
 ---
 
-**5. Gerenciando Seus Dados**
+## 🔥 Configuração para Execução
 
-Mantenha seu catálogo de produtos e sua lista de clientes sempre atualizados.
+Este projeto depende totalmente dos serviços do Firebase. Para executá-lo localmente, siga os passos:
 
-* Para Adicionar: Clique no ícone de `+` no canto superior direito das telas "Gerenciar Produtos" ou "Gerenciar Clientes". Preencha o formulário e salve.
-* Para Editar: Clique no ícone de lápis (✏️) ao lado do item desejado. Altere os dados e salve.
-* Para Excluir: Clique no ícone de lixeira (🗑️). Um pop-up de confirmação aparecerá para evitar exclusões acidentais.
+1.  Crie um novo projeto no [Firebase Console](https://console.firebase.google.com/).
+2.  Ative os serviços **Authentication** (com o provedor "E-mail/senha") e **Firestore Database** (no modo de teste).
+3.  Use a **FlutterFire CLI** com o comando `flutterfire configure` para conectar seu app ao projeto Firebase. Isso irá gerar o arquivo `lib/firebase_options.dart`.
+4.  No Firestore, crie os índices compostos que serão solicitados no console de depuração ao executar as buscas e filtros pela primeira vez.
 
 ---
-*Fim do Manual.*
+
+## 🚀 Como Executar o Projeto
+
+```bash
+# 1. Clone o repositório
+git clone [https://github.com/seu-usuario/gelo-gestor.git](https://github.com/seu-usuario/gelo-gestor.git)
+
+# 2. Navegue para a pasta do projeto
+cd gelo-gestor
+
+# 3. Instale as dependências
+flutter pub get
+
+# 4. Execute o aplicativo
+flutter run
