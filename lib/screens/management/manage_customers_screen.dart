@@ -159,66 +159,85 @@ class ManageCustomersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Gerenciar Clientes'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _showCustomerDialog(context), // Chama sem cliente para 'Adicionar'
+            onPressed: () => _showCustomerDialog(context),
           ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('customers')
-            .orderBy('name')
-            .snapshots(),
-        builder: (ctx, customerSnapshot) {
-          if (customerSnapshot.hasError) return const Center(child: Text('Ocorreu um erro!'));
-          if (customerSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final customerDocs = customerSnapshot.data?.docs ?? [];
-          if (customerDocs.isEmpty) return const Center(child: Text('Nenhum cliente cadastrado.'));
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Opacity(
+              opacity: isDarkMode ? 0.4 : 0.15,
+              child: Image.asset(
+                isDarkMode
+                    ? 'assets/backgrounds/background_light.png'
+                    : 'assets/images/background_dark.jpg',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('customers')
+                  .orderBy('name')
+                  .snapshots(),
+              builder: (ctx, customerSnapshot) {
+                if (customerSnapshot.hasError) return const Center(child: Text('Ocorreu um erro!'));
+                if (customerSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final customerDocs = customerSnapshot.data?.docs ?? [];
+                if (customerDocs.isEmpty) return const Center(child: Text('Nenhum cliente cadastrado.'));
 
-          return ListView.builder(
-            itemCount: customerDocs.length,
-            itemBuilder: (ctx, index) {
-              final customerDocument = customerDocs[index];
-              final customerData = customerDocument.data() as Map<String, dynamic>;
-              final customerName = customerData['name'] ?? 'Nome indisponível';
-              final customerPhone = customerData['phone'] ?? '';
+                return ListView.builder(
+                  padding: const EdgeInsets.only(top: 8),
+                  itemCount: customerDocs.length,
+                  itemBuilder: (ctx, index) {
+                    final customerDocument = customerDocs[index];
+                    final customerData = customerDocument.data() as Map<String, dynamic>;
+                    final customerName = customerData['name'] ?? 'Nome indisponível';
+                    final customerPhone = customerData['phone'] ?? '';
 
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-                child: ListTile(
-                  leading: const Icon(Icons.person),
-                  title: Text(customerName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(customerPhone),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
-                        onPressed: () {
-                          // Chama o diálogo passando o cliente para 'Editar'
-                          _showCustomerDialog(context, customer: customerDocument);
-                        },
+                    return Card(
+                      color: Theme.of(context).cardColor.withOpacity(0.9),
+                      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+                      child: ListTile(
+                        leading: const Icon(Icons.person),
+                        title: Text(customerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(customerPhone),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
+                              onPressed: () => _showCustomerDialog(context, customer: customerDocument),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                              onPressed: () => _deleteCustomer(context, customerDocument.id, customerName),
+                            ),
+                          ],
+                        ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-                        onPressed: () {
-                          _deleteCustomer(context, customerDocument.id, customerName);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

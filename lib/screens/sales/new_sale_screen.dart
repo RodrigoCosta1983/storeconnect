@@ -6,14 +6,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/product_model.dart';
 import '../../providers/cart_provider.dart';
-import '../cart/cart_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../management/manage_customers_screen.dart';
 import '../management/manage_products_screen.dart';
 import '../sales/sales_history_screen.dart';
 import '../login/login_screen.dart';
 
-// 1. Convertido para StatefulWidget
 class NewSaleScreen extends StatefulWidget {
   NewSaleScreen({super.key});
 
@@ -22,7 +20,6 @@ class NewSaleScreen extends StatefulWidget {
 }
 
 class _NewSaleScreenState extends State<NewSaleScreen> {
-  // 2. Lógica e variáveis de estado movidas para a classe State
   String _appVersion = 'Carregando...';
 
   @override
@@ -40,37 +37,27 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
     }
   }
 
-  // 3. Implementação da função para abrir links
   Future<void> _launchURL(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      throw 'Não foi possível abrir $url';
+    if (!(await launchUrl(uri))) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível abrir o link: $url')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      extendBodyBehindAppBar: true, // Estende o body para trás da AppBar
       appBar: AppBar(
         title: const Text('Nova Venda'),
-        actions: [
-          Consumer<CartProvider>(
-            builder: (context, cart, _) => Badge(
-              label: Text(cart.itemCount.toString()),
-              isLabelVisible: cart.itemCount > 0,
-              child: IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (ctx) => const CartScreen()),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+        backgroundColor: Colors.transparent, // Deixa a AppBar transparente
+        elevation: 0, // Remove a sombra
       ),
       drawer: Drawer(
         child: ListView(
@@ -122,17 +109,11 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               },
             ),
             const Divider(),
-            // 4. Estrutura do item "Sobre" corrigida
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: const Text("Sobre"),
               onTap: () {
-                // --- MUDANÇA AQUI ---
-                // 1. Verificamos qual o tema atual ANTES de abrir o diálogo
-                final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-                // 2. Escolhemos a cor apropriada
-                final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
-
+                final textColor = isDarkMode ? Colors.white70 : Colors.black54;
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -141,9 +122,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Este é um app de gestão para distribuidoras de gelo, desenvolvido por RodrigoCosta-DEV.",
-                        ),
+                        const Text("Este é um app de gestão para distribuidoras de gelo, desenvolvido por RodrigoCosta-DEV."),
                         const SizedBox(height: 20),
                         ListTile(
                           contentPadding: EdgeInsets.zero,
@@ -151,15 +130,10 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                           title: const Text("rodrigocosta-dev.com"),
                           onTap: () => _launchURL('https://rodrigocosta-dev.com'),
                         ),
-
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.only(top: 12.0),
-                            child: Text(
-                              'Versão do App: $_appVersion',
-                              // 3. Usamos a nossa variável de cor dinâmica
-                              style: TextStyle(fontSize: 14, color: textColor),
-                            ),
+                            child: Text('Versão do App: $_appVersion', style: TextStyle(fontSize: 14, color: textColor)),
                           ),
                         ),
                       ],
@@ -170,7 +144,6 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
-
                   ),
                 );
               },
@@ -188,101 +161,126 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
           ],
         ),
       ),
-
-
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('products')
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
-        builder: (ctx, productSnapshot) {
-          if (productSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final productDocs = productSnapshot.data?.docs ?? [];
-
-          if (productDocs.isEmpty) {
-            return const Center(child: Text('Nenhum produto cadastrado. Adicione produtos em "Gerenciar Produtos".'));
-          }
-
-          return GridView.builder(
-            padding: const EdgeInsets.all(10.0),
-            itemCount: productDocs.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1 / 1.15, // Ajuste fino da altura
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Opacity(
+              opacity: isDarkMode ? 0.4 : 0.15,
+              child: Image.asset(
+                isDarkMode
+                    ? 'assets/backgrounds/background_light.png'
+                    : 'assets/images/background_dark.jpg',
+                fit: BoxFit.cover,
+              ),
             ),
-            itemBuilder: (ctx, i) {
-              final productData = productDocs[i].data() as Map<String, dynamic>;
-              final product = Product(
-                id: productDocs[i].id,
-                name: productData['name'] ?? 'Produto sem nome',
-                price: (productData['price'] as num).toDouble(),
-                imageUrl: productData['imageUrl'] ?? '',
-              );
+          ),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final screenWidth = constraints.maxWidth;
+                int crossAxisCount = 2;
+                double childAspectRatio = 1 / 1.15;
 
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Expanded(
-                      child: Center(
-                        child: Icon(Icons.ac_unit, size: 50, color: Theme.of(context).primaryColor.withOpacity(0.5)),
+                if (screenWidth > 1200) {
+                  crossAxisCount = 5;
+                  childAspectRatio = 1 / 1.2;
+                } else if (screenWidth > 800) {
+                  crossAxisCount = 4;
+                  childAspectRatio = 1 / 1.1;
+                } else if (screenWidth > 600) {
+                  crossAxisCount = 3;
+                }
+
+                return StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance.collection('products').orderBy('createdAt', descending: true).snapshots(),
+                  builder: (ctx, productSnapshot) {
+                    if (productSnapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final productDocs = productSnapshot.data?.docs ?? [];
+                    if (productDocs.isEmpty) {
+                      return const Center(child: Text('Nenhum produto cadastrado.'));
+                    }
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(10.0),
+                      itemCount: productDocs.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: childAspectRatio,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        product.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4), // Diminuído o padding vertical
-                      child: Text(
-                        'R\$ ${product.price.toStringAsFixed(2)}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColor, fontSize: 16),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                      // --- O BOTÃO COM ÍCONE ESTÁ DE VOLTA ---
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.add_shopping_cart, size: 18),
-                        label: const Text('Adicionar'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () {
-                          Provider.of<CartProvider>(context, listen: false).addItem(product);
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${product.name} adicionado ao carrinho!'),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+                      itemBuilder: (ctx, i) {
+                        final productData = productDocs[i].data() as Map<String, dynamic>;
+                        final product = Product(
+                          id: productDocs[i].id,
+                          name: productData['name'] ?? 'Produto sem nome',
+                          price: (productData['price'] as num).toDouble(),
+                          imageUrl: productData['imageUrl'] ?? '',
+                        );
+                        return Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          clipBehavior: Clip.antiAlias,
+                          color: Theme.of(context).cardColor.withOpacity(0.9),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              Expanded(
+                                child: Center(
+                                  child: Icon(Icons.ac_unit, size: 50, color: Theme.of(context).primaryColor.withOpacity(0.5)),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  product.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                child: Text(
+                                  'R\$ ${product.price.toStringAsFixed(2)}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                                child: ElevatedButton.icon(
+                                  icon: const Icon(Icons.add_shopping_cart, size: 18),
+                                  label: const Text('Adicionar'),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  onPressed: () {
+                                    Provider.of<CartProvider>(context, listen: false).addItem(product);
+                                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('${product.name} adicionado ao carrinho!'),
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

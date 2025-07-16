@@ -183,6 +183,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     Query query = FirebaseFirestore.instance.collection('products');
 
     if (_searchQuery.isNotEmpty) {
@@ -198,8 +199,11 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
     }
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Gerenciar Produtos'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -207,14 +211,28 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Buscar por nome...',
+      Positioned.fill(
+      child: Opacity(
+      opacity: isDarkMode ? 0.4 : 0.15,
+        child: Image.asset(
+          isDarkMode
+              ? 'assets/backgrounds/background_light.png'
+              : 'assets/images/background_dark.jpg',
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+    SafeArea(
+    child: Column(
+    children: [
+    Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: TextField(
+    controller: _searchController,
+    decoration: InputDecoration(
+    labelText: 'Buscar por nome...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -270,6 +288,9 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
               },
             ),
           ),
+    ],
+    ),
+    ),
         ],
       ),
     );

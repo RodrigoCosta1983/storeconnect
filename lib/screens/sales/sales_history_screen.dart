@@ -12,6 +12,9 @@ class SalesHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // 1. Construímos a consulta ao Firestore com base no filtro
     Query query = FirebaseFirestore.instance.collection('sales');
     String screenTitle;
     final now = DateTime.now();
@@ -44,6 +47,7 @@ class SalesHistoryScreen extends StatelessWidget {
         screenTitle = 'Vendas do Mês';
         break;
       case SalesHistoryFilter.all:
+      default:
         screenTitle = 'Histórico de Vendas';
         break;
     }
@@ -51,36 +55,59 @@ class SalesHistoryScreen extends StatelessWidget {
     query = query.orderBy('date', descending: true);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(screenTitle),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: query.snapshots(),
-        builder: (ctx, salesSnapshot) {
-          if (salesSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (salesSnapshot.hasError) {
-            print('ERRO DETECTADO: ${salesSnapshot.error}');
-            return Center(child: Text('Ocorreu um erro ao carregar os dados. Verifique o console.'));
-          }
-          if (!salesSnapshot.hasData || salesSnapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text(
-                'Nenhuma venda encontrada para este filtro.',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
+      body: Stack(
+        children: [
+          // Imagem de fundo dinâmica
+          Positioned.fill(
+            child: Opacity(
+              opacity: isDarkMode ? 0.4 : 0.15,
+              child: Image.asset(
+                isDarkMode
+                    ? 'assets/backgrounds/background_light.png'
+                    : 'assets/images/background_dark.jpg',
+                fit: BoxFit.cover,
               ),
-            );
-          }
+            ),
+          ),
+          // Conteúdo principal com a lista
+          SafeArea(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: query.snapshots(),
+              builder: (ctx, salesSnapshot) {
+                if (salesSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (salesSnapshot.hasError) {
+                  print('ERRO DETECTADO: ${salesSnapshot.error}');
+                  return const Center(child: Text('Ocorreu um erro ao carregar os dados. Verifique o console.'));
+                }
+                if (!salesSnapshot.hasData || salesSnapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Nenhuma venda encontrada para este filtro.',
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  );
+                }
 
-          final salesDocs = salesSnapshot.data!.docs;
+                final salesDocs = salesSnapshot.data!.docs;
 
-          return ListView.builder(
-            itemCount: salesDocs.length,
-            itemBuilder: (ctx, i) =>
-                OrderItemWidget(order: SaleOrder.fromSnapshot(salesDocs[i])),
-          );
-        },
+                return ListView.builder(
+                  padding: const EdgeInsets.only(top: 8),
+                  itemCount: salesDocs.length,
+                  itemBuilder: (ctx, i) =>
+                      OrderItemWidget(order: SaleOrder.fromSnapshot(salesDocs[i])),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
