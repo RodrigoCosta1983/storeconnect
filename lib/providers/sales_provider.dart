@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,35 +11,19 @@ class SalesProvider with ChangeNotifier {
   // A lista em memória não é mais a nossa fonte principal de dados,
   // mas podemos mantê-la para outros usos ou removê-la no futuro.
   // Por enquanto, não vamos mais adicionar itens a ela.
-=======
-// lib/providers/sales_provider.dart
-
-import 'package:flutter/foundation.dart';
-import '../models/sale_order_model.dart';
-import '../models/customer_model.dart';
-import '../providers/cart_provider.dart';
-import 'cash_flow_provider.dart';
-
-class SalesProvider with ChangeNotifier {
->>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
   List<SaleOrder> _orders = [];
 
   List<SaleOrder> get orders {
     return [..._orders];
   }
 
-<<<<<<< HEAD
   // --- MÉTODO ADDORDER ATUALIZADO ---
   Future<void> addOrder({
-=======
-  void addOrder({
->>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
     required List<CartItem> cartProducts,
     required double total,
     required Customer customer,
     required DateTime dueDate,
     String? notes,
-<<<<<<< HEAD
   }) async {
     // Pega o ID do usuário atualmente logado
     final user = FirebaseAuth.instance.currentUser;
@@ -98,36 +81,3 @@ class SalesProvider with ChangeNotifier {
   }
 }
 
-=======
-  }) {
-    final newOrder = SaleOrder(
-      id: DateTime.now().toString(),
-      amount: total,
-      products: cartProducts,
-      date: DateTime.now(),
-      customer: customer,
-      dueDate: dueDate,
-      notes: notes,
-      paymentMethod: 'Fiado', // Por enquanto, focamos no fiado
-      isPaid: false,
-    );
-    _orders.insert(0, newOrder); // Adiciona no início da lista
-    notifyListeners();
-  }
-  void markOrderAsPaid(String orderId, CashFlowProvider cashFlow) {
-    // Encontra o índice do pedido na lista
-    final orderIndex = _orders.indexWhere((order) => order.id == orderId);
-    if (orderIndex >= 0) {
-      // Marca como pago
-      _orders[orderIndex].isPaid = true;
-
-      // Adiciona o valor ao caixa
-      cashFlow.addIncome(_orders[orderIndex].amount);
-
-      // Notifica a UI para reconstruir
-      notifyListeners();
-      print('Pedido $orderId marcado como pago e R\$${_orders[orderIndex].amount} adicionado ao caixa.');
-    }
-  }
-}
->>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765

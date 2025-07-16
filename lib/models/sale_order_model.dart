@@ -1,10 +1,7 @@
 // lib/models/sale_order_model.dart
 
-<<<<<<< HEAD
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-=======
->>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
 import '../providers/cart_provider.dart'; // Precisamos do CartItem
 import './customer_model.dart'; // Precisamos do Cliente
 
@@ -30,7 +27,6 @@ class SaleOrder {
     required this.paymentMethod,
     this.isPaid = false,
   });
-<<<<<<< HEAD
 
   // --- NOVO CONSTRUTOR AQUI ---
   // Este construtor cria um SaleOrder a partir de um documento do Firestore
@@ -61,6 +57,4 @@ class SaleOrder {
       isPaid: data['isPaid'],
     );
   }
-=======
->>>>>>> 5adddfbc9206da942d50765e62fcc7ef61a1b765
 }
