@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/sale_order_model.dart';
 import '../../widgets/order_item_widget.dart';
 
@@ -7,15 +8,21 @@ enum SalesHistoryFilter { all, pending, overdue, today, thisMonth }
 
 class SalesHistoryScreen extends StatelessWidget {
   final SalesHistoryFilter filter;
-
   const SalesHistoryScreen({super.key, this.filter = SalesHistoryFilter.all});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Scaffold(appBar: AppBar(), body: const Center(child: Text('Nenhum usuário logado.')));
+    }
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    // 1. Construímos a consulta ao Firestore com base no filtro
-    Query query = FirebaseFirestore.instance.collection('sales');
+    // --- CORREÇÃO PRINCIPAL AQUI ---
+    // A base da nossa consulta agora é a subcoleção 'sales' do usuário
+    Query query = FirebaseFirestore.instance
+        .collection('users').doc(user.uid)
+        .collection('sales');
     String screenTitle;
     final now = DateTime.now();
 
@@ -63,7 +70,6 @@ class SalesHistoryScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Imagem de fundo dinâmica
           Positioned.fill(
             child: Opacity(
               opacity: isDarkMode ? 0.4 : 0.15,
@@ -75,7 +81,6 @@ class SalesHistoryScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Conteúdo principal com a lista
           SafeArea(
             child: StreamBuilder<QuerySnapshot>(
               stream: query.snapshots(),
@@ -84,20 +89,18 @@ class SalesHistoryScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (salesSnapshot.hasError) {
-                  print('ERRO DETECTADO: ${salesSnapshot.error}');
-                  return const Center(child: Text('Ocorreu um erro ao carregar os dados. Verifique o console.'));
+                  print('ERRO NO HISTÓRICO: ${salesSnapshot.error}');
+                  return const Center(child: Text('Ocorreu um erro ao carregar os dados.'));
                 }
                 if (!salesSnapshot.hasData || salesSnapshot.data!.docs.isEmpty) {
                   return const Center(
                     child: Text(
                       'Nenhuma venda encontrada para este filtro.',
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   );
                 }
-
                 final salesDocs = salesSnapshot.data!.docs;
-
                 return ListView.builder(
                   padding: const EdgeInsets.only(top: 8),
                   itemCount: salesDocs.length,

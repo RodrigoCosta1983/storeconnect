@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-// O diálogo agora pode receber um cliente existente para edição
+// Diálogo para Adicionar/Editar Cliente
 class _CustomerDialog extends StatefulWidget {
-  final DocumentSnapshot? customer; // Torna o cliente opcional
+  final DocumentSnapshot? customer;
 
   const _CustomerDialog({this.customer});
 
@@ -17,12 +18,11 @@ class _CustomerDialogState extends State<_CustomerDialog> {
   final _phoneController = TextEditingController();
   var _isLoading = false;
 
-  bool get _isEditing => widget.customer != null; // Verifica se estamos editando
+  bool get _isEditing => widget.customer != null;
 
   @override
   void initState() {
     super.initState();
-    // Se estiver editando, preenche os campos com os dados existentes
     if (_isEditing) {
       final customerData = widget.customer!.data() as Map<String, dynamic>;
       _nameController.text = customerData['name'];
@@ -34,23 +34,31 @@ class _CustomerDialogState extends State<_CustomerDialog> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
     final String name = _nameController.text;
     final String phone = _phoneController.text;
 
     try {
       if (_isEditing) {
-        // --- LÓGICA DE ATUALIZAÇÃO ---
         await FirebaseFirestore.instance
-            .collection('customers')
-            .doc(widget.customer!.id)
+            .collection('users').doc(user.uid)
+            .collection('customers').doc(widget.customer!.id)
             .update({
           'name': name,
+          'name_lowercase': name.toLowerCase(),
           'phone': phone,
         });
       } else {
-        // --- LÓGICA DE CRIAÇÃO (continua a mesma) ---
-        await FirebaseFirestore.instance.collection('customers').add({
+        await FirebaseFirestore.instance
+            .collection('users').doc(user.uid)
+            .collection('customers').add({
           'name': name,
+          'name_lowercase': name.toLowerCase(),
           'phone': phone,
           'createdAt': Timestamp.now(),
         });
@@ -124,10 +132,33 @@ class _CustomerDialogState extends State<_CustomerDialog> {
 }
 
 // A tela principal de gerenciamento de clientes
-class ManageCustomersScreen extends StatelessWidget {
+class ManageCustomersScreen extends StatefulWidget {
   const ManageCustomersScreen({super.key});
 
-  // A função agora pode receber um cliente para edição
+  @override
+  State<ManageCustomersScreen> createState() => _ManageCustomersScreenState();
+}
+
+class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
+  String _searchQuery = '';
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _showCustomerDialog(BuildContext context, {DocumentSnapshot? customer}) {
     showDialog(
       context: context,
@@ -137,6 +168,9 @@ class ManageCustomersScreen extends StatelessWidget {
   }
 
   void _deleteCustomer(BuildContext context, String customerId, String customerName) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -148,7 +182,9 @@ class ManageCustomersScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Excluir'),
             onPressed: () {
-              FirebaseFirestore.instance.collection('customers').doc(customerId).delete();
+              FirebaseFirestore.instance
+                  .collection('users').doc(user.uid)
+                  .collection('customers').doc(customerId).delete();
               Navigator.of(ctx).pop();
             },
           ),
@@ -159,7 +195,26 @@ class ManageCustomersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Scaffold(body: Center(child: Text('Erro: Nenhum usuário logado.')));
+    }
+
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    Query query = FirebaseFirestore.instance
+        .collection('users').doc(user.uid)
+        .collection('customers');
+
+    if (_searchQuery.isNotEmpty) {
+      final searchQueryLower = _searchQuery.toLowerCase();
+      query = query
+          .where('name_lowercase', isGreaterThanOrEqualTo: searchQueryLower)
+          .where('name_lowercase', isLessThanOrEqualTo: '$searchQueryLower\uf8ff')
+          .orderBy('name_lowercase');
+    } else {
+      query = query.orderBy('name'); // Ordena por nome por padrão
+    }
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -188,53 +243,75 @@ class ManageCustomersScreen extends StatelessWidget {
             ),
           ),
           SafeArea(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('customers')
-                  .orderBy('name')
-                  .snapshots(),
-              builder: (ctx, customerSnapshot) {
-                if (customerSnapshot.hasError) return const Center(child: Text('Ocorreu um erro!'));
-                if (customerSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final customerDocs = customerSnapshot.data?.docs ?? [];
-                if (customerDocs.isEmpty) return const Center(child: Text('Nenhum cliente cadastrado.'));
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Buscar por nome...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => _searchController.clear(),
+                      )
+                          : null,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Theme.of(context).cardColor.withOpacity(0.85),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: query.snapshots(),
+                    builder: (ctx, customerSnapshot) {
+                      if (customerSnapshot.hasError) return const Center(child: Text('Ocorreu um erro!'));
+                      if (customerSnapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final customerDocs = customerSnapshot.data?.docs ?? [];
+                      if (customerDocs.isEmpty) return const Center(child: Text('Nenhum cliente encontrado.'));
 
-                return ListView.builder(
-                  padding: const EdgeInsets.only(top: 8),
-                  itemCount: customerDocs.length,
-                  itemBuilder: (ctx, index) {
-                    final customerDocument = customerDocs[index];
-                    final customerData = customerDocument.data() as Map<String, dynamic>;
-                    final customerName = customerData['name'] ?? 'Nome indisponível';
-                    final customerPhone = customerData['phone'] ?? '';
+                      return ListView.builder(
+                        padding: const EdgeInsets.only(top: 4),
+                        itemCount: customerDocs.length,
+                        itemBuilder: (ctx, index) {
+                          final customerDocument = customerDocs[index];
+                          final customerData = customerDocument.data() as Map<String, dynamic>;
+                          final customerName = customerData['name'] ?? 'Nome indisponível';
+                          final customerPhone = customerData['phone'] ?? '';
 
-                    return Card(
-                      color: Theme.of(context).cardColor.withOpacity(0.9),
-                      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-                      child: ListTile(
-                        leading: const Icon(Icons.person),
-                        title: Text(customerName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text(customerPhone),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
-                              onPressed: () => _showCustomerDialog(context, customer: customerDocument),
+                          return Card(
+                            color: Theme.of(context).cardColor.withOpacity(0.9),
+                            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+                            child: ListTile(
+                              leading: const Icon(Icons.person),
+                              title: Text(customerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text(customerPhone),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
+                                    onPressed: () => _showCustomerDialog(context, customer: customerDocument),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                                    onPressed: () => _deleteCustomer(context, customerDocument.id, customerName),
+                                  ),
+                                ],
+                              ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-                              onPressed: () => _deleteCustomer(context, customerDocument.id, customerName),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],

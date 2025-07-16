@@ -1,5 +1,6 @@
 // lib/widgets/payment_options_sheet.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tienda_model/widgets/confirm_fiado_dialog.dart';
 
@@ -10,16 +11,21 @@ class PaymentOptionsSheet extends StatelessWidget {
   const PaymentOptionsSheet({super.key});
 
   void _showCustomerSelectionDialog(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
           title: const Text('Selecionar Cliente'),
-          // 2. Usamos um StreamBuilder para buscar os clientes
           content: SizedBox(
             width: double.maxFinite,
+            // Usamos o StreamBuilder para buscar os clientes do usuário logado
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('customers').orderBy('name').snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection('users').doc(user.uid) // Caminho para o usuário
+                  .collection('customers').orderBy('name').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -27,25 +33,21 @@ class PaymentOptionsSheet extends StatelessWidget {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(child: Text('Nenhum cliente cadastrado.'));
                 }
-
                 final customersDocs = snapshot.data!.docs;
-
                 return ListView.builder(
                   shrinkWrap: true,
                   itemCount: customersDocs.length,
                   itemBuilder: (context, index) {
                     final customerData = customersDocs[index].data() as Map<String, dynamic>;
-                    // 3. Criamos um objeto Customer com os dados do Firestore
                     final customer = Customer(
                       id: customersDocs[index].id,
                       name: customerData['name'] ?? 'Sem nome',
                       phone: customerData['phone'] ?? '',
                     );
-
                     return ListTile(
                       title: Text(customer.name),
                       onTap: () {
-                        Navigator.of(ctx).pop(); // Fecha o diálogo de seleção
+                        Navigator.of(ctx).pop();
                         showDialog(
                           context: context,
                           builder: (context) => ConfirmFiadoDialog(customer: customer),
@@ -60,9 +62,7 @@ class PaymentOptionsSheet extends StatelessWidget {
           actions: [
             TextButton(
               child: const Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
+              onPressed: () => Navigator.of(ctx).pop(),
             ),
           ],
         );

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/product_model.dart';
 import '../../providers/cart_provider.dart';
+import '../cart/cart_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../management/manage_customers_screen.dart';
 import '../management/manage_products_screen.dart';
@@ -50,14 +52,35 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    // Se não houver usuário logado, não podemos buscar os produtos.
+    if (user == null) {
+      return Scaffold(body: Center(child: Text("Erro: Nenhum usuário logado.")));
+    }
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       extendBodyBehindAppBar: true, // Estende o body para trás da AppBar
       appBar: AppBar(
         title: const Text('Nova Venda'),
-        backgroundColor: Colors.transparent, // Deixa a AppBar transparente
-        elevation: 0, // Remove a sombra
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          Consumer<CartProvider>(
+            builder: (context, cart, _) => Badge(
+              label: Text(cart.itemCount.toString()),
+              isLabelVisible: cart.itemCount > 0,
+              child: IconButton(
+                icon: const Icon(Icons.shopping_cart),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (ctx) => const CartScreen()),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -192,7 +215,11 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                 }
 
                 return StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('products').orderBy('createdAt', descending: true).snapshots(),
+                  stream: FirebaseFirestore.instance
+                      .collection('users').doc(user.uid)
+                      .collection('products')
+                      .orderBy('createdAt', descending: true)
+                      .snapshots(),
                   builder: (ctx, productSnapshot) {
                     if (productSnapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());

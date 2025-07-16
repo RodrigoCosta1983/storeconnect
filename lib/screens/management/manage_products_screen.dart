@@ -1,7 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// 1. Definição do Diálogo como StatefulWidget (com createState)
 class _ProductDialog extends StatefulWidget {
   final DocumentSnapshot? product;
 
@@ -11,7 +11,6 @@ class _ProductDialog extends StatefulWidget {
   _ProductDialogState createState() => _ProductDialogState();
 }
 
-// 2. Implementação completa do State do Diálogo
 class _ProductDialogState extends State<_ProductDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -34,17 +33,26 @@ class _ProductDialogState extends State<_ProductDialog> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // Idealmente, mostrar um erro ao usuário aqui
+      setState(() => _isLoading = false);
+      return;
+    }
+
     final String name = _nameController.text;
     final double price = double.parse(_priceController.text);
 
     try {
       if (_isEditing) {
         await FirebaseFirestore.instance
-            .collection('products')
-            .doc(widget.product!.id)
+            .collection('users').doc(user.uid)
+            .collection('products').doc(widget.product!.id)
             .update({'name': name,  'name_lowercase': name.toLowerCase(), 'price': price});
       } else {
-        await FirebaseFirestore.instance.collection('products').add({
+        await FirebaseFirestore.instance
+            .collection('users').doc(user.uid)
+            .collection('products').add({
           'name': name,
           'name_lowercase': name.toLowerCase(),
           'price': price,
@@ -124,7 +132,6 @@ class _ProductDialogState extends State<_ProductDialog> {
   }
 }
 
-// 3. A tela principal que agora é um StatefulWidget para a busca
 class ManageProductsScreen extends StatefulWidget {
   const ManageProductsScreen({super.key});
 
@@ -161,6 +168,9 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
   }
 
   void _deleteProduct(BuildContext context, String productId, String productName) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -172,7 +182,11 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Excluir'),
             onPressed: () {
-              FirebaseFirestore.instance.collection('products').doc(productId).delete();
+              // --- CORREÇÃO NA EXCLUSÃO ---
+              // Aponta para a subcoleção do usuário logado
+              FirebaseFirestore.instance
+                  .collection('users').doc(user.uid)
+                  .collection('products').doc(productId).delete();
               Navigator.of(ctx).pop();
             },
           ),
@@ -183,16 +197,22 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Scaffold(body: Center(child: Text('Erro: Nenhum usuário logado.')));
+    }
+
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    Query query = FirebaseFirestore.instance.collection('products');
+
+    Query query = FirebaseFirestore.instance
+        .collection('users').doc(user.uid)
+        .collection('products');
 
     if (_searchQuery.isNotEmpty) {
-      final searchQueryLower = _searchQuery.toLowerCase(); // Converte o termo da busca para minúsculas
+      final searchQueryLower = _searchQuery.toLowerCase();
       query = query
-      // Busca no novo campo 'name_lowercase'
           .where('name_lowercase', isGreaterThanOrEqualTo: searchQueryLower)
           .where('name_lowercase', isLessThanOrEqualTo: '$searchQueryLower\uf8ff')
-      // Ordena pelo campo de busca para o índice funcionar
           .orderBy('name_lowercase');
     } else {
       query = query.orderBy('createdAt', descending: true);
@@ -213,84 +233,90 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
       ),
       body: Stack(
         children: [
-      Positioned.fill(
-      child: Opacity(
-      opacity: isDarkMode ? 0.4 : 0.15,
-        child: Image.asset(
-          isDarkMode
-              ? 'assets/backgrounds/background_light.png'
-              : 'assets/images/background_dark.jpg',
-          fit: BoxFit.cover,
-        ),
-      ),
-    ),
-    SafeArea(
-    child: Column(
-    children: [
-    Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: TextField(
-    controller: _searchController,
-    decoration: InputDecoration(
-    labelText: 'Buscar por nome...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () => _searchController.clear(),
-                )
-                    : null,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          Positioned.fill(
+            child: Opacity(
+              opacity: isDarkMode ? 0.4 : 0.15,
+              child: Image.asset(
+                // --- CORREÇÃO DA IMAGEM ---
+                // O fundo escuro é para o modo escuro, o claro para o modo claro
+                isDarkMode
+                    ? 'assets/backgrounds/background_light.png'
+                    : 'assets/images/background_dark.jpg',
+                fit: BoxFit.cover,
               ),
             ),
           ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: query.snapshots(),
-              builder: (ctx, productSnapshot) {
-                if (productSnapshot.hasError) return const Center(child: Text('Ocorreu um erro!'));
-                if (productSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final productDocs = productSnapshot.data?.docs ?? [];
-                if (productDocs.isEmpty) return const Center(child: Text('Nenhum produto encontrado.'));
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Buscar por nome...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => _searchController.clear(),
+                      )
+                          : null,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Theme.of(context).cardColor.withOpacity(0.85),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: query.snapshots(),
+                    builder: (ctx, productSnapshot) {
+                      if (productSnapshot.hasError) return const Center(child: Text('Ocorreu um erro!'));
+                      if (productSnapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final productDocs = productSnapshot.data?.docs ?? [];
+                      if (productDocs.isEmpty) return const Center(child: Text('Nenhum produto encontrado.'));
 
-                return ListView.builder(
-                  itemCount: productDocs.length,
-                  itemBuilder: (ctx, index) {
-                    final productDocument = productDocs[index];
-                    final productData = productDocument.data() as Map<String, dynamic>;
-                    final price = productData.containsKey('price') ? productData['price'] as num : 0.0;
-                    final productName = productData['name'] ?? 'Nome indisponível';
+                      return ListView.builder(
+                        padding: const EdgeInsets.only(top: 4),
+                        itemCount: productDocs.length,
+                        itemBuilder: (ctx, index) {
+                          final productDocument = productDocs[index];
+                          final productData = productDocument.data() as Map<String, dynamic>;
+                          final price = productData.containsKey('price') ? productData['price'] as num : 0.0;
+                          final productName = productData['name'] ?? 'Nome indisponível';
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-                      child: ListTile(
-                        title: Text(productName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('R\$ ${price.toStringAsFixed(2)}'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
-                              onPressed: () => _showProductDialog(context, product: productDocument),
+                          return Card(
+                            color: Theme.of(context).cardColor.withOpacity(0.9),
+                            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+                            child: ListTile(
+                              title: Text(productName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text('R\$ ${price.toStringAsFixed(2)}'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
+                                    onPressed: () => _showProductDialog(context, product: productDocument),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                                    onPressed: () => _deleteProduct(context, productDocument.id, productName),
+                                  ),
+                                ],
+                              ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-                              onPressed: () => _deleteProduct(context, productDocument.id, productName),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
-    ],
-    ),
-    ),
         ],
       ),
     );

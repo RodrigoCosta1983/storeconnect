@@ -34,7 +34,9 @@ class SalesProvider with ChangeNotifier {
 
     try {
       // Adiciona um novo documento na coleção 'sales'
-      await FirebaseFirestore.instance.collection('sales').add({
+      await FirebaseFirestore.instance
+          .collection('users').doc(userId)
+          .collection('sales').add({
         'amount': total,
         'date': Timestamp.now(), // Firestore usa Timestamp
         'dueDate': Timestamp.fromDate(dueDate),
@@ -63,9 +65,16 @@ class SalesProvider with ChangeNotifier {
 
   // --- MÉTODO MARKORDERASPAID ATUALIZADO ---
   Future<void> markOrderAsPaid(String orderId, double orderAmount, CashFlowProvider cashFlow) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('Nenhum usuário logado para atualizar a venda.');
+    }
+    final userId = user.uid;
     try {
       // Encontra o documento da venda na coleção 'sales' e atualiza o campo 'isPaid'
-      await FirebaseFirestore.instance.collection('sales').doc(orderId).update({
+      await FirebaseFirestore.instance
+          .collection('users').doc(userId)
+          .collection('sales').doc(orderId).update({
         'isPaid': true,
       });
 
