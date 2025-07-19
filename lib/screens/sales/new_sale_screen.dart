@@ -178,10 +178,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               leading: const Icon(Icons.logout),
               title: const Text('Sair'),
               onTap: () {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      (Route<dynamic> route) => false,
-                );
+                FirebaseAuth.instance.signOut();
               },
             ),
           ],
