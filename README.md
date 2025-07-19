@@ -1,90 +1,95 @@
-
-# Gelo Gestor - Sistema de Gestão para Distribuidoras
+# Gelo Gestor - Sistema de Gestão para Distribuidoras v1.0
 
 ![Flutter](https://img.shields.io/badge/Framework-Flutter-02569B?style=for-the-badge&logo=flutter)
 ![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?style=for-the-badge&logo=firebase)
 ![Dart](https://img.shields.io/badge/Language-Dart-0175C2?style=for-the-badge&logo=dart)
-![Status](https://img.shields.io/badge/Status-V1.0-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Completo-green?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-blue?style=for-the-badge)
 
-## 📖 Sobre o Projeto
-
-**Gelo Gestor** é um aplicativo móvel completo, construído com Flutter e Firebase, que serve como uma solução de gestão de ponta a ponta para distribuidoras de gelo. O projeto foi concebido para digitalizar e otimizar operações diárias, substituindo controles manuais por um sistema centralizado, reativo e acessível.
-
-O principal objetivo é fornecer ao proprietário do negócio uma ferramenta poderosa para gerenciar vendas, clientes e finanças, com um foco especializado no controle de vendas a prazo (fiado), uma das maiores dores do setor.
+> Um sistema de gestão completo e multiplataforma para distribuidoras de gelo, construído com Flutter e Firebase.
 
 ---
 
-## ✨ Funcionalidades Implementadas
+## 📖 Sobre o Projeto
+
+**Gelo Gestor** é um aplicativo completo que serve como uma solução de gestão de ponta a ponta para distribuidoras de gelo. O projeto foi concebido para digitalizar e otimizar operações diárias, substituindo controles manuais por um sistema centralizado, reativo e acessível em dispositivos móveis e na web.
+
+O principal objetivo é fornecer ao proprietário do negócio uma ferramenta poderosa para gerenciar vendas, clientes e finanças, com um foco especializado no controle de vendas a prazo (fiado), uma das maiores dores do setor.
+
+<br>
+
+## ✨ Funcionalidades Principais
 
 A versão atual do aplicativo é um produto funcional completo, com dados persistidos na nuvem e uma arquitetura robusta.
 
-#### 🔑 **Autenticação & Segurança**
+#### 🔑 **Autenticação & Segurança Multi-Tenant**
 * **Sistema de Login Completo:** Autenticação segura de usuários com E-mail e Senha via **Firebase Authentication**.
-* **Registro de Novos Usuários:** Fluxo de criação de conta direto no aplicativo com validação de dados.
-* **Gerenciamento de Sessão:** Lógica de "Sair" que limpa o estado de navegação e retorna à tela de login de forma segura.
+* **Arquitetura Multi-Tenant:** Os dados de cada usuário (loja) são completamente isolados e seguros no banco de dados, utilizando as Regras de Segurança do Firebase.
+* **Gerenciamento de Sessão:** Login persistente e função de "Sair" segura.
 
 #### 📊 **Dashboard & Análise de Dados**
 * **Painel de Controle Interativo:** Dashboard com métricas de negócio em tempo real (Vendas do Período, Caixa, Contas a Receber, Contas Vencidas).
 * **Filtros de Período:** Análise de performance de vendas com filtros por **Hoje, Semana e Mês**.
 * **Gráficos Dinâmicos:** Visualização de dados de vendas em gráficos de barra para análises semanais e mensais.
-* **Navegação por Atalhos:** Cards da dashboard que funcionam como atalhos para listas pré-filtradas no histórico, otimizando o fluxo de trabalho do usuário.
+* **Navegação por Atalhos:** Cards da dashboard que funcionam como atalhos para listas já filtradas.
 
 #### 📦 **Gestão de Dados (CRUD Completo)**
 * **Gerenciamento de Produtos:** Tela dedicada para Criar, Ler, Editar e Excluir produtos, com dados persistidos no Firestore.
+* **Upload de Imagens:** Funcionalidade para adicionar imagens aos produtos, com upload para o **Firebase Storage**.
 * **Gerenciamento de Clientes:** Tela dedicada para Criar, Ler, Editar e Excluir clientes.
-* **Busca Inteligente:** Funcionalidade de busca *case-insensitive* em tempo real para encontrar produtos e clientes rapidamente.
+* **Busca Inteligente:** Funcionalidade de busca *case-insensitive* em tempo real para encontrar produtos e clientes.
 
 #### 💰 **Fluxo de Venda e Financeiro**
-* **Ponto de Venda (PDV) Reativo:** Tela de "Nova Venda" que lê o catálogo de produtos em tempo real do Firestore.
+* **Ponto de Venda (PDV) Reativo:** Tela de "Nova Venda" que lê o catálogo de produtos (com imagens) em tempo real do Firestore.
 * **Gestão de Vendas "Fiado":** Fluxo completo para vendas a prazo, com seleção de clientes do banco de dados e definição de data de vencimento.
-* **Controle de Pagamentos:** Funcionalidade para **marcar uma conta como paga**, que atualiza o status da venda no Firestore e credita o valor ao caixa do aplicativo.
+* **Controle de Pagamentos:** Função para **marcar uma conta como paga**, que atualiza o status da venda e credita o valor ao caixa.
 * **Histórico de Vendas Detalhado:** Lista de todas as vendas salvas no Firestore, com filtros e detalhes expansíveis.
-* **Alertas Visuais:** O histórico destaca automaticamente vendas vencidas e não pagas com ícones e cores de alerta para facilitar a cobrança.
+* **Alertas Visuais:** O histórico destaca automaticamente vendas vencidas e não pagas.
 
 #### 🎨 **Experiência do Usuário (UI/UX)**
-* **Suporte a Temas:** Interface totalmente adaptável para **Modo Claro** e **Modo Escuro**.
+* **Interface Adaptativa:** O layout se adapta automaticamente para diferentes tamanhos de tela, funcionando bem em celulares (retrato/paisagem) e na web.
+* **Suporte a Temas:** Interface totalmente funcional em **Modo Claro** e **Modo Escuro**.
 * **Design Consistente:** Fundos personalizados e elementos de UI que se adaptam ao tema para uma experiência visual coesa.
-* **Feedback ao Usuário:** Uso de indicadores de carregamento, `SnackBar`s para confirmação e diálogos de alerta para operações críticas (como exclusão).
+* **Performance Otimizada:** Imagens de fundo pré-carregadas na inicialização e uso de `StreamBuilder` para atualizações de UI eficientes e em tempo real.
 
----
+<hr>
 
-## 🛠️ Como Foi Construído? (Tecnologias e Arquitetura)
+## 🛠️ Tecnologias e Arquitetura
 
-O aplicativo foi desenvolvido com uma stack de tecnologias modernas, focada em performance, escalabilidade e uma experiência de desenvolvimento ágil.
-
-* **Framework Principal:** **[Flutter](https://flutter.dev/)** - Para uma interface de usuário compilada nativamente, garantindo performance e consistência visual em Android e iOS a partir de uma única base de código.
-* **Linguagem de Programação:** **[Dart](https://dart.dev/)** - Com todos os recursos de segurança de tipos (Sound Null Safety).
-* **Backend (BaaS - Backend as a Service):** **[Firebase](https://firebase.google.com/)**
-    * **Autenticação:** **Firebase Authentication** para gerenciar o ciclo de vida dos usuários.
-    * **Banco de Dados:** **Cloud Firestore** como nosso banco de dados NoSQL, em tempo real e escalável, para armazenar todos os dados da aplicação.
-* **Gerenciamento de Estado:** **[Provider](https://pub.dev/packages/provider)** - Escolhido por sua simplicidade e poder para gerenciar o estado da aplicação de forma reativa e organizada.
-* **UI Reativa:** O aplicativo foi construído em torno do widget **`StreamBuilder`**, permitindo que a interface reaja e se atualize instantaneamente a qualquer mudança nos dados do Firestore, sem a necessidade de recarregar a tela manualmente.
+* **Framework Principal:** **[Flutter](https://flutter.dev/)**
+* **Linguagem:** **[Dart](https://dart.dev/)** (com Sound Null Safety)
+* **Backend (BaaS):** **[Firebase](https://firebase.google.com/)**
+  * **Autenticação:** Firebase Authentication
+  * **Banco de Dados:** Cloud Firestore (NoSQL, em tempo real)
+  * **Armazenamento de Arquivos:** Firebase Storage
+* **Gerenciamento de Estado:** **[Provider](https://pub.dev/packages/provider)**
 * **Bibliotecas Adicionais Notáveis:**
-    * **`fl_chart`**: Para a criação dos gráficos dinâmicos e interativos na Dashboard.
-    * **`intl`**: Para formatação de datas e valores monetários seguindo padrões locais.
-    * **`package_info_plus`** e **`url_launcher`**: Para funcionalidades adicionais de UI.
+  * **`fl_chart`**: Para a criação dos gráficos dinâmicos.
+  * **`image_picker`**: Para a seleção de imagens da galeria do dispositivo.
+  * **`intl`**, **`package_info_plus`**, **`url_launcher`**.
 
----
+<hr>
 
 ## 🔥 Configuração para Execução
 
-Este projeto depende totalmente dos serviços do Firebase. Para executá-lo localmente, siga os passos:
+Este projeto depende totalmente dos serviços do Firebase. Para executá-lo localmente:
 
 1.  Crie um novo projeto no [Firebase Console](https://console.firebase.google.com/).
-2.  Ative os serviços **Authentication** (com o provedor "E-mail/senha") e **Firestore Database** (no modo de teste).
-3.  Use a **FlutterFire CLI** com o comando `flutterfire configure` para conectar seu app ao projeto Firebase. Isso irá gerar o arquivo `lib/firebase_options.dart`.
-4.  No Firestore, crie os índices compostos que serão solicitados no console de depuração ao executar as buscas e filtros pela primeira vez.
+2.  Ative os serviços **Authentication** (provedor "E-mail/senha"), **Firestore Database** (no modo de teste) e **Storage**.
+3.  Ajuste as **Regras de Segurança** do Firestore e do Storage para permitir leitura e escrita para usuários autenticados.
+4.  Use a **FlutterFire CLI** (`flutterfire configure`) para conectar seu app ao projeto, o que irá gerar o arquivo `lib/firebase_options.dart`.
+5.  Crie os índices compostos do Firestore que serão solicitados no console de depuração ao executar as buscas e filtros pela primeira vez.
 
----
+<hr>
 
 ## 🚀 Como Executar o Projeto
 
 ```bash
 # 1. Clone o repositório
-git clone [https://github.com/seu-usuario/gelo-gestor.git](https://github.com/seu-usuario/gelo-gestor.git)
+git clone [https://github.com/RodrigoCosta1983/tienda_model_.git](https://github.com/RodrigoCosta1983/tienda_model_.git)
 
 # 2. Navegue para a pasta do projeto
-cd gelo-gestor
+cd tienda_model_
 
 # 3. Instale as dependências
 flutter pub get
@@ -93,4 +98,9 @@ flutter pub get
 flutter run
 
 
+👨‍💻 Autor
 RodrigoCostaDEV
+
+GitHub: @RodrigoCosta1983
+
+Website: rodrigocosta-dev.com
