@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-// 1. Importe os pacotes do Firebase
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -12,21 +10,42 @@ import 'package:tienda_model/screens/login/login_screen.dart';
 import 'package:tienda_model/themes/app_theme.dart';
 
 
-// 2. Transforme a main em uma função assíncrona
 void main() async {
-  // 3. Garanta que o Flutter está pronto
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 4. Inicialize o Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+// 1. MyApp agora é um StatefulWidget
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  // 2. Ele tem o método obrigatório createState
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+// 3. A lógica e o método build foram movidos para a classe de estado _MyAppState
+class _MyAppState extends State<MyApp> {
+  bool _imagesPrecached = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Faz o pré-carregamento das imagens
+    if (!_imagesPrecached) {
+      _precacheImages(context);
+      _imagesPrecached = true;
+    }
+  }
+
+  void _precacheImages(BuildContext context) {
+    precacheImage(const AssetImage('assets/images/background_dark.jpg'), context);
+    precacheImage(const AssetImage('assets/images/background_light.jpg'), context);
+    print('Imagens de fundo pré-carregadas na memória.');
+  }
 
   @override
   Widget build(BuildContext context) {
