@@ -151,7 +151,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.link),
                           title: const Text("rodrigocosta-dev.com"),
-                          onTap: () => _launchURL('https://rodrigocosta-dev.com'),
+                          onTap: () => _launchURL('http://rodrigocosta-dev.com'),
                         ),
                         Center(
                           child: Padding(
