@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,7 +41,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
 
   Future<void> _launchURL(String url) async {
     final uri = Uri.parse(url);
-    if (!(await launchUrl(uri))) {
+    if (!await launchUrl(uri)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Não foi possível abrir o link: $url')),
@@ -53,14 +53,13 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    // Se não houver usuário logado, não podemos buscar os produtos.
     if (user == null) {
       return Scaffold(body: Center(child: Text("Erro: Nenhum usuário logado.")));
     }
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      extendBodyBehindAppBar: true, // Estende o body para trás da AppBar
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Nova Venda'),
         backgroundColor: Colors.transparent,
@@ -136,7 +135,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               leading: const Icon(Icons.info_outline),
               title: const Text("Sobre"),
               onTap: () {
-                final textColor = isDarkMode ? Colors.white70 : Colors.black54;
+                final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+                final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -156,7 +156,10 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.only(top: 12.0),
-                            child: Text('Versão do App: $_appVersion', style: TextStyle(fontSize: 14, color: textColor)),
+                            child: Text(
+                              'Versão do App: $_appVersion',
+                              style: TextStyle(fontSize: 14, color: textColor),
+                            ),
                           ),
                         ),
                       ],
@@ -224,9 +227,17 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                     if (productSnapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
+                    if (productSnapshot.hasError) {
+                      return const Center(child: Text('Erro ao carregar produtos.'));
+                    }
                     final productDocs = productSnapshot.data?.docs ?? [];
                     if (productDocs.isEmpty) {
-                      return const Center(child: Text('Nenhum produto cadastrado.'));
+                      return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text('Nenhum produto cadastrado. Adicione produtos em "Gerenciar Produtos".', textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
+                          )
+                      );
                     }
                     return GridView.builder(
                       padding: const EdgeInsets.all(10.0),
@@ -239,11 +250,12 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                       ),
                       itemBuilder: (ctx, i) {
                         final productData = productDocs[i].data() as Map<String, dynamic>;
+                        final imageUrl = productData['imageUrl'] as String?;
                         final product = Product(
                           id: productDocs[i].id,
                           name: productData['name'] ?? 'Produto sem nome',
                           price: (productData['price'] as num).toDouble(),
-                          imageUrl: productData['imageUrl'] ?? '',
+                          imageUrl: imageUrl ?? '',
                         );
                         return Card(
                           elevation: 4,
@@ -254,7 +266,23 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
                               Expanded(
-                                child: Center(
+                                child: (imageUrl != null && imageUrl.isNotEmpty)
+                                    ? ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                                  child: Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    loadingBuilder: (ctx, child, progress) {
+                                      if (progress == null) return child;
+                                      return const Center(child: CircularProgressIndicator());
+                                    },
+                                    errorBuilder: (ctx, err, stack) {
+                                      return Center(child: Icon(Icons.broken_image, size: 50, color: Colors.grey));
+                                    },
+                                  ),
+                                )
+                                    : Center(
                                   child: Icon(Icons.ac_unit, size: 50, color: Theme.of(context).primaryColor.withOpacity(0.5)),
                                 ),
                               ),

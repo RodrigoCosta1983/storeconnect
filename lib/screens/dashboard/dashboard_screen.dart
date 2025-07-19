@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../providers/cash_flow_provider.dart';
-import '../../providers/sales_provider.dart';
 import '../../widgets/monthly_sales_chart.dart';
 import '../../widgets/sales_chart.dart';
 import '../sales/sales_history_screen.dart';
