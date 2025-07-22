@@ -54,8 +54,7 @@ class SalesHistoryScreen extends StatelessWidget {
         screenTitle = 'Vendas do Mês';
         break;
       case SalesHistoryFilter.all:
-      default:
-        screenTitle = 'Histórico de Vendas';
+      screenTitle = 'Histórico de Vendas';
         break;
     }
 

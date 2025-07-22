@@ -11,7 +11,7 @@ class SalesProvider with ChangeNotifier {
   // A lista em memória não é mais a nossa fonte principal de dados,
   // mas podemos mantê-la para outros usos ou removê-la no futuro.
   // Por enquanto, não vamos mais adicionar itens a ela.
-  List<SaleOrder> _orders = [];
+  final List<SaleOrder> _orders = [];
 
   List<SaleOrder> get orders {
     return [..._orders];
@@ -57,9 +57,11 @@ class SalesProvider with ChangeNotifier {
       // Não precisamos mais do notifyListeners() aqui, pois a tela de histórico
       // lerá os dados diretamente do stream do Firestore.
     } catch (error) {
-      print('Erro ao salvar a venda: $error');
+      if (kDebugMode) {
+        print('Erro ao salvar a venda: $error');
+      }
       // Re-lança o erro para que a UI possa tratá-lo se necessário
-      throw error;
+      rethrow;
     }
   }
 
@@ -81,11 +83,15 @@ class SalesProvider with ChangeNotifier {
       // A lógica do caixa continua a mesma
       cashFlow.addIncome(orderAmount);
 
-      print('Pedido $orderId marcado como pago no Firestore.');
+      if (kDebugMode) {
+        print('Pedido $orderId marcado como pago no Firestore.');
+      }
       // Não precisamos do notifyListeners() pelo mesmo motivo de antes.
     } catch (error) {
-      print('Erro ao marcar como pago: $error');
-      throw error;
+      if (kDebugMode) {
+        print('Erro ao marcar como pago: $error');
+      }
+      rethrow;
     }
   }
 }

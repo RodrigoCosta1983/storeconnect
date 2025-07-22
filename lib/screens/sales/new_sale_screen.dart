@@ -12,7 +12,6 @@ import '../dashboard/dashboard_screen.dart';
 import '../management/manage_customers_screen.dart';
 import '../management/manage_products_screen.dart';
 import '../sales/sales_history_screen.dart';
-import '../login/login_screen.dart';
 
 class NewSaleScreen extends StatefulWidget {
   NewSaleScreen({super.key});

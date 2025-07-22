@@ -156,8 +156,9 @@ class _ProductDialogState extends State<_ProductDialog> {
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Nome do Produto'),
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Por favor, insira um nome.';
+                  }
                   return null;
                 },
               ),
@@ -168,10 +169,12 @@ class _ProductDialogState extends State<_ProductDialog> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Por favor, insira um preço.';
-                  if (double.tryParse(value) == null)
+                  }
+                  if (double.tryParse(value) == null) {
                     return 'Por favor, insira um número válido.';
+                  }
                   return null;
                 },
               ),
@@ -345,16 +348,18 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                   child: StreamBuilder<QuerySnapshot>(
                     stream: query.snapshots(),
                     builder: (ctx, productSnapshot) {
-                      if (productSnapshot.hasError)
+                      if (productSnapshot.hasError) {
                         return const Center(child: Text('Ocorreu um erro!'));
+                      }
                       if (productSnapshot.connectionState ==
                           ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       final productDocs = productSnapshot.data?.docs ?? [];
-                      if (productDocs.isEmpty)
+                      if (productDocs.isEmpty) {
                         return const Center(
                             child: Text('Nenhum produto encontrado.'));
+                      }
 
                       return ListView.builder(
                         padding: const EdgeInsets.only(top: 4),
