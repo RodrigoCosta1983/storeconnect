@@ -1,0 +1,115 @@
+# Manual do Usuário: Gelo Gestor
+
+**Versão 1.5** | Julho de 2025
+
+*O Guia Definitivo para a Gestão Completa do seu Negócio*
+
+---
+### **Índice**
+1.  Introdução
+2.  Primeiros Passos
+3.  Gerenciamento de Dados
+4.  O Ponto de Venda (PDV)
+5.  Controle de Estoque
+6.  Análise e Controle Financeiro
+7.  Configurações e Suporte
+
+---
+
+### **1. Introdução**
+
+Bem-vindo ao **Gelo Gestor**!
+
+Este manual é o seu guia completo para dominar todas as ferramentas que o aplicativo oferece. O Gelo Gestor foi desenvolvido para ser seu principal aliado na administração do negócio, transformando tarefas complexas do dia a dia em processos simples, rápidos e seguros, tudo acessível pela palma da sua mão ou pelo navegador do seu computador.
+
+### **2. Primeiros Passos**
+
+#### **2.1. Login e Registro de Conta**
+Para garantir a segurança dos seus dados, cada loja possui um acesso restrito.
+* **Registro:** Na primeira vez, clique em "Registre-se", insira um e-mail e crie uma senha. Este será o login principal da loja (o "Dono").
+* **Login:** Use o e-mail e a senha cadastrados para acessar o sistema.
+* **Login Persistente:** O aplicativo se lembrará de você. Não é preciso fazer login toda vez que abrir, tornando o acesso mais rápido.
+
+#### **2.2. Navegação Principal**
+Após o login, a tela inicial é a de **"Nova Venda"**. Para acessar todas as outras funcionalidades, clique no ícone de menu (☰) no canto superior esquerdo para abrir o menu lateral.
+
+---
+
+### **3. Gerenciamento de Dados (O Coração do seu Negócio)**
+
+Antes de vender, você precisa alimentar o sistema com seus produtos e clientes.
+
+#### **3.1. Gerenciar Produtos**
+Acesse pelo menu lateral. Nesta tela você pode:
+* **Adicionar (+):** Cadastre um novo produto informando Nome, Preço, **Quantidade Inicial em Estoque** e uma **Imagem**.
+* **Buscar:** Use a barra de busca para encontrar um produto rapidamente pelo nome (não diferencia maiúsculas de minúsculas).
+* **Editar (✏️):** Altere qualquer informação de um produto, incluindo sua foto e quantidade em estoque.
+* **Excluir (🗑️):** Remova um produto do seu catálogo (uma confirmação será solicitada para evitar acidentes).
+
+#### **3.2. Gerenciar Clientes**
+Ideal para o controle de vendas "fiado".
+* **Adicionar (+):** Cadastre um novo cliente com Nome e Telefone.
+* **Buscar, Editar e Excluir:** As mesmas funcionalidades da tela de produtos estão disponíveis aqui.
+
+---
+
+### **4. O Ponto de Venda (PDV)**
+
+A tela **"Nova Venda"** é onde a ação acontece.
+
+1.  **Catálogo Visual:** Seus produtos são exibidos em uma grade com a imagem, nome e preço.
+2.  **Adicionar ao Carrinho:** Clique em **"+ Adicionar"**. O ícone do carrinho (🛒) no topo mostrará a quantidade de *tipos* de produtos adicionados.
+3.  **Ajustar o Carrinho:** Clique no ícone do carrinho para ir à tela de resumo. Lá, você pode:
+    * Ajustar as quantidades de cada item com os botões `+` e `-`.
+    * Excluir um item arrastando-o para a esquerda.
+    * Limpar todo o carrinho com o ícone de lixeira (🗑️) no topo.
+4.  **Finalizar a Venda:** Após conferir, clique em **"FINALIZAR VENDA"**. Um painel com as opções de pagamento aparecerá.
+
+#### **Formas de Pagamento**
+* **Dinheiro e Cartão:** Ao selecionar uma dessas opções, a venda é concluída imediatamente, o estoque é atualizado e o valor é somado ao seu caixa.
+* **PIX:** Um pop-up aparecerá exibindo a imagem do QR Code da sua loja. Após o cliente pagar, clique em **"Pagamento Concluído"** para finalizar a venda.
+* **Fiado / A Prazo:** O fluxo completo para controle de dívidas:
+    1.  Selecione o cliente na lista (que vem do seu cadastro).
+    2.  Confirme os detalhes e **escolha a data de vencimento** no calendário.
+    3.  Clique em "Confirmar Venda". A venda é registrada como pendente no histórico.
+
+---
+
+### **5. Controle de Estoque**
+
+O Gelo Gestor automatiza seu inventário.
+
+* **Cadastro de Estoque:** Ao adicionar ou editar um produto, você define a quantidade disponível.
+* **Baixa Automática:** Esta é a mágica do sistema. Ao **finalizar qualquer venda** (seja à vista ou fiado), o aplicativo vai automaticamente ao seu estoque e **subtrai a quantidade vendida** de cada produto. Isso garante que seus números estejam sempre corretos, de forma segura e sem trabalho manual.
+
+---
+
+### **6. Análise e Controle Financeiro**
+
+#### **6.1. Dashboard (Painel de Controle)**
+Sua central de comando, acessível pelo menu.
+* **Visão Geral:** Cards com os totais de Vendas do período, Saldo em Caixa, Total a Receber (fiado) e a quantidade de Contas Vencidas.
+* **Interatividade:** Os cards são atalhos. Clicar em "Vendas da Semana/Mês" abre um **gráfico de performance**. Clicar em "Contas a Receber" ou "Vencidas" leva diretamente para a lista filtrada no histórico.
+
+#### **6.2. Histórico de Vendas**
+Aqui você encontra o registro de todas as operações.
+* **Alertas Visuais:**
+    * ⚠️ **Vermelho:** A conta está **vencida** e precisa de atenção.
+    * ✅ **Verde:** A conta foi **paga**.
+    * 📄 **Cinza:** A conta está pendente, mas dentro do prazo.
+* **Marcar como Pago:** Para vendas "fiado", expanda os detalhes e clique em **"Marcar como Pago"**. O sistema automaticamente:
+    1.  Muda o status da venda para "paga".
+    2.  Adiciona o valor recebido ao seu **"Caixa Atual"** na Dashboard.
+
+---
+
+### **7. Configurações e Suporte**
+
+#### **7.1. Temas Claro e Escuro**
+O aplicativo se adapta automaticamente ao tema do seu celular (Android ou iOS) para maior conforto visual.
+
+#### **7.2. Sobre o App**
+No menu lateral, a opção "Sobre" exibe a versão atual do aplicativo e informações do desenvolvedor.
+
+<br>
+*Fim do Manual.*

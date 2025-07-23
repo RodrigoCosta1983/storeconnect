@@ -18,9 +18,41 @@ class CartScreen extends StatelessWidget {
     final cartItems = cart.items.values.toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Seu Carrinho'),
-      ),
+        appBar: AppBar(
+          title: const Text('Seu Carrinho'),
+          // --- ADICIONE ESTE BLOCO ---
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              tooltip: 'Limpar Carrinho',
+              onPressed: cart.itemCount == 0 ? null : () {
+                // Mostra um diálogo de confirmação antes de limpar
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Limpar Carrinho?'),
+                    content: const Text('Deseja remover todos os itens do carrinho?'),
+                    actions: [
+                      TextButton(
+                        child: const Text('Não'),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                      ),
+                      TextButton(
+                        child: const Text('Sim'),
+                        onPressed: () {
+                          Provider.of<CartProvider>(context, listen: false).clear();
+                          Navigator.of(ctx).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        // --- FIM DO BLOCO ---
+        ),
+
       body: Column(
         children: <Widget>[
           // Card com o resumo do total
@@ -85,9 +117,9 @@ class CartScreen extends StatelessWidget {
           // Lista dos itens do carrinho
           Expanded(
             child: ListView.builder(
-              itemCount: cart.itemCount,
+              itemCount: cart.items.length,
               itemBuilder: (ctx, i) => CartItemWidget(
-                productId: cart.items.keys.toList()[i],
+                productId: cartItems[i].id,
                 title: cartItems[i].name,
                 quantity: cartItems[i].quantity,
                 price: cartItems[i].price,

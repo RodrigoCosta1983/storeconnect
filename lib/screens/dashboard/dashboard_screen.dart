@@ -66,35 +66,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {required String title,
         required String value,
         required IconData icon,
-        Color? color,
-        bool isWeb = false}) {
-
-    final cardWidth = isWeb ? 280.0 : double.infinity;
-
-    return SizedBox(
-      width: cardWidth,
-      child: Card(
-        elevation: 4,
-        color: Theme.of(context).cardColor.withOpacity(0.9),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, size: 40, color: color ?? Theme.of(context).primaryColor),
-              const SizedBox(height: 15),
-              Text(
-                title,
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                value,
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+        Color? color}) {
+    // Para a web, damos um tamanho para os cards ficarem uniformes no Wrap
+    return Card(
+      elevation: 4,
+      color: Theme.of(context).cardColor.withOpacity(0.9),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Icon(icon, size: 35, color: color ?? Theme.of(context).primaryColor),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
     );
@@ -155,6 +150,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       return orderDate.isAfter(startOfWeek.subtract(const Duration(days: 1)));
                     case TimePeriod.month:
                       return orderDate.month == today.month && orderDate.year == today.year;
+                    default:
+                      return false;
                   }
                 }).fold(0.0, (sum, doc) => sum + (doc['amount'] as num));
 
@@ -163,6 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   case TimePeriod.day: salesTitle = 'Vendas de Hoje'; break;
                   case TimePeriod.week: salesTitle = 'Vendas da Semana'; break;
                   case TimePeriod.month: salesTitle = 'Vendas do Mês'; break;
+                  default: salesTitle = 'Vendas';
                 }
 
                 final Map<int, double> weeklySalesSummary = {0:0,1:0,2:0,3:0,4:0,5:0,6:0};
@@ -193,17 +191,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     salesCardOnTap = () => _showMonthlySalesChartDialog(monthlySalesSummary);
                     break;
                   case TimePeriod.day:
+                  default:
                     salesCardOnTap = () => Navigator.of(context).push(MaterialPageRoute(
                       builder: (ctx) => const SalesHistoryScreen(filter: SalesHistoryFilter.today),
                     ));
                     break;
                 }
 
-                 List<Widget> infoCards(bool isWebLayout) => [
+                final List<Widget> infoCards = [
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: salesCardOnTap,
-                    child: _buildInfoCard(context, title: salesTitle, value: 'R\$ ${salesFiltered.toStringAsFixed(2)}', icon: Icons.point_of_sale, isWeb: isWebLayout),
+                    child: _buildInfoCard(context, title: salesTitle, value: 'R\$ ${salesFiltered.toStringAsFixed(2)}', icon: Icons.point_of_sale),
                   ),
                   Consumer<CashFlowProvider>(
                     builder: (context, cashFlowData, child) {
@@ -213,72 +212,76 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         value: 'R\$ ${cashFlowData.currentBalance.toStringAsFixed(2)}',
                         icon: Icons.wallet_sharp,
                         color: Colors.green,
-                        isWeb: isWebLayout,
                       );
                     },
                   ),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => const SalesHistoryScreen(filter: SalesHistoryFilter.pending))),
-                    child: _buildInfoCard(context, title: 'Contas a Receber (Fiado)', value: 'R\$ ${pendingFiado.toStringAsFixed(2)}', icon: Icons.receipt_long, color: Colors.orange, isWeb: isWebLayout),
+                    child: _buildInfoCard(context, title: 'Contas a Receber (Fiado)', value: 'R\$ ${pendingFiado.toStringAsFixed(2)}', icon: Icons.receipt_long, color: Colors.orange),
                   ),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => const SalesHistoryScreen(filter: SalesHistoryFilter.overdue))),
-                    child: _buildInfoCard(context, title: 'Contas Vencidas', value: '$overdueCount', icon: Icons.warning_amber_rounded, color: Colors.red, isWeb: isWebLayout),
+                    child: _buildInfoCard(context, title: 'Contas Vencidas', value: '$overdueCount', icon: Icons.warning_amber_rounded, color: Colors.red),
                   ),
                 ];
 
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    children: [
-                      Center(
-                        child: ToggleButtons(
-                          isSelected: [
-                            _selectedPeriod == TimePeriod.day,
-                            _selectedPeriod == TimePeriod.week,
-                            _selectedPeriod == TimePeriod.month,
-                          ],
-                          onPressed: (index) {
-                            setState(() {
-                              if (index == 0) _selectedPeriod = TimePeriod.day;
-                              if (index == 1) _selectedPeriod = TimePeriod.week;
-                              if (index == 2) _selectedPeriod = TimePeriod.month;
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(8),
-                          children: const [
-                            Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Hoje')),
-                            Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Semana')),
-                            Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Mês')),
-                          ],
-                        ),
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                      child: ToggleButtons(
+                        isSelected: [
+                          _selectedPeriod == TimePeriod.day,
+                          _selectedPeriod == TimePeriod.week,
+                          _selectedPeriod == TimePeriod.month,
+                        ],
+                        onPressed: (index) {
+                          setState(() {
+                            if (index == 0) _selectedPeriod = TimePeriod.day;
+                            if (index == 1) _selectedPeriod = TimePeriod.week;
+                            if (index == 2) _selectedPeriod = TimePeriod.month;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        children: const [
+                          Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Hoje')),
+                          Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Semana')),
+                          Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Mês')),
+                        ],
                       ),
-                      const SizedBox(height: 10),
-                      LayoutBuilder(
+                    ),
+                    Expanded(
+                      child: LayoutBuilder(
                         builder: (context, constraints) {
-                          if (constraints.maxWidth < 300) {
-                            // Layout para Celular
-                            return Column(
-                              children: infoCards(false).map((card) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: card,
-                              )).toList(),
+                          if (constraints.maxWidth > 700) {
+                            return SingleChildScrollView(
+                              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                              child: Wrap(
+                                spacing: 20.0,
+                                runSpacing: 20.0,
+                                alignment: WrapAlignment.center,
+                                children: infoCards.map((card) => SizedBox(width: 280, child: card)).toList(),
+                              ),
                             );
                           } else {
-                            // Layout para Web/Tablet
-                            return Wrap(
-                              spacing: 20.0,
-                              runSpacing: 20.0,
-                              alignment: WrapAlignment.center,
-                              children: infoCards(true),
+                            return GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: constraints.maxWidth > 420 ? 2 : 1,
+                                childAspectRatio: constraints.maxWidth > 420 ? 1.3 : 1.8,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                              ),
+                              itemCount: infoCards.length,
+                              itemBuilder: (context, index) => infoCards[index],
                             );
                           }
                         },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             ),

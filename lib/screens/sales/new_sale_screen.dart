@@ -66,7 +66,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
         actions: [
           Consumer<CartProvider>(
             builder: (context, cart, _) => Badge(
-              label: Text(cart.itemCount.toString()),
+              label: Text(cart.items.length.toString()),
               isLabelVisible: cart.itemCount > 0,
               child: IconButton(
                 icon: const Icon(Icons.shopping_cart),
