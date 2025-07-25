@@ -111,7 +111,7 @@ Website: rodrigocosta-dev.com
 
 ![Flutter](https://img.shields.io/badge/Framework-Flutter-02569B?style=for-the-badge&logo=flutter)
 ![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?style=for-the-badge&logo=firebase)
-![Dart](https://img.shields.io/badge/L language-Dart-0175C2?style=for-the-badge&logo=dart)
+![Dart](https://img.shields.io/badge/L language-Dart-0175C2?style=for-the-badge&logo=dart).
 ![Status](https://img.shields.io/badge/Status-Completo-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-blue?style=for-the-badge)
 
