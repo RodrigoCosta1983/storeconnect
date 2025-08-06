@@ -22,18 +22,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
   TimePeriod _selectedPeriod = TimePeriod.day;
 
   // Função para exibir o gráfico semanal
+  // Em dashboard_screen.dart
+
   void _showWeeklySalesChartDialog(Map<int, double> weeklySalesData) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Vendas da Semana'),
+        // 👇 ADICIONE ESTAS LINHAS PARA MUDAR O FUNDO
+        backgroundColor: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        // 👆 FIM DAS LINHAS ADICIONADAS
+
+        title: const Text('Vendas da Semana', style: TextStyle(color: Colors.white)),
         content: SizedBox(
-            height: 300,
-            width: 400,
-            child: SalesChart(weeklySales: weeklySalesData)),
+          height: 300,
+          width: 400,
+          child: SalesChart(weeklySales: weeklySalesData),
+        ),
         actions: [
           TextButton(
-            child: const Text('Fechar'),
+            child: const Text('Fechar', style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(ctx).pop(),
           ),
         ],
@@ -42,18 +50,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   // Função para exibir o gráfico mensal
+
   void _showMonthlySalesChartDialog(Map<int, double> monthlySalesData) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Vendas do Mês (por Semana)'),
+        // 👇 Adicione estas linhas para o estilo escuro
+        backgroundColor: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+
+        title: const Text('Vendas do Mês (por Semana)', style: TextStyle(color: Colors.white)),
         content: SizedBox(
             height: 300,
             width: 400,
             child: MonthlySalesChart(monthlySales: monthlySalesData)),
         actions: [
           TextButton(
-            child: const Text('Fechar'),
+            child: const Text('Fechar', style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(ctx).pop(),
           ),
         ],
@@ -61,33 +74,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Widget para criar os cards de informação
-  Widget _buildInfoCard(BuildContext context,
-      {required String title,
-        required String value,
-        required IconData icon,
-        Color? color}) {
-    // Para a web, damos um tamanho para os cards ficarem uniformes no Wrap
+  // SUGESTÃO DE MELHORIA para o seu _buildInfoCard
+  Widget _buildInfoCard(BuildContext context, {
+    required String title,
+    required String value,
+    required IconData icon,
+    Color? iconColor,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
-      elevation: 4,
-      color: Theme.of(context).cardColor.withOpacity(0.9),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 2,
+      // Usar a cor do schema para o card, para melhor consistência com o tema
+      color: colorScheme.surface.withOpacity(0.95),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, size: 35, color: color ?? Theme.of(context).primaryColor),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-              overflow: TextOverflow.ellipsis,
+            // Ícone e Título na mesma linha
+            Row(
+              children: [
+                Icon(icon, size: 24, color: iconColor ?? colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+                ),
+              ],
             ),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            const Spacer(), // Usa o espaço disponível para empurrar o valor para baixo
+
+            // Valor com FittedBox para autoajuste
+            SizedBox(
+              height: 40, // Altura fixa para o valor se ajustar dentro
+              child: FittedBox(
+                fit: BoxFit.contain,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
           ],
         ),
@@ -211,19 +241,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         title: 'Caixa Atual',
                         value: 'R\$ ${cashFlowData.currentBalance.toStringAsFixed(2)}',
                         icon: Icons.wallet_sharp,
-                        color: Colors.green,
+                        iconColor: Colors.green,
                       );
                     },
                   ),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => const SalesHistoryScreen(filter: SalesHistoryFilter.pending))),
-                    child: _buildInfoCard(context, title: 'Contas a Receber (Fiado)', value: 'R\$ ${pendingFiado.toStringAsFixed(2)}', icon: Icons.receipt_long, color: Colors.orange),
+                    child: _buildInfoCard(context, title: 'Contas a Receber (Fiado)', value: 'R\$ ${pendingFiado.toStringAsFixed(2)}', icon: Icons.receipt_long, iconColor: Colors.orange),
                   ),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => const SalesHistoryScreen(filter: SalesHistoryFilter.overdue))),
-                    child: _buildInfoCard(context, title: 'Contas Vencidas', value: '$overdueCount', icon: Icons.warning_amber_rounded, color: Colors.red),
+                    child: _buildInfoCard(context, title: 'Contas Vencidas', value: '$overdueCount', icon: Icons.warning_amber_rounded, iconColor: Colors.red),
                   ),
                 ];
 
