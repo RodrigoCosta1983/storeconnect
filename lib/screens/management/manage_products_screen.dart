@@ -19,6 +19,7 @@ class _ProductDialogState extends State<_ProductDialog> {
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController(); // Controller para quantidade
+  final _minimumStockController = TextEditingController();
   var _isLoading = false;
 
   File? _selectedImageFile;
@@ -34,6 +35,7 @@ class _ProductDialogState extends State<_ProductDialog> {
       _nameController.text = productData['name'];
       _priceController.text = productData['price'].toString();
       _quantityController.text = (productData['quantity'] ?? 0).toString();
+      _minimumStockController.text = (productData['minimumStock'] ?? 0).toString();
       if (productData.containsKey('imageUrl')) {
         _existingImageUrl = productData['imageUrl'];
       }
@@ -61,6 +63,7 @@ class _ProductDialogState extends State<_ProductDialog> {
     final String name = _nameController.text;
     final double price = double.parse(_priceController.text);
     final int quantity = int.tryParse(_quantityController.text) ?? 0;
+    final int minimumStock = int.tryParse(_minimumStockController.text) ?? 0;
     String imageUrl = _existingImageUrl ?? '';
 
     try {
@@ -75,6 +78,7 @@ class _ProductDialogState extends State<_ProductDialog> {
         'name_lowercase': name.toLowerCase(),
         'price': price,
         'quantity': quantity, // Adiciona a quantidade aos dados a serem salvos
+        'minimumStock': minimumStock,
         'imageUrl': imageUrl,
       };
 
@@ -161,6 +165,16 @@ class _ProductDialogState extends State<_ProductDialog> {
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Por favor, insira a quantidade.';
+                  if (int.tryParse(value) == null || int.parse(value) < 0) return 'Insira um número válido.';
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _minimumStockController,
+                decoration: const InputDecoration(labelText: 'Estoque Mínimo para Alerta'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Defina um estoque mínimo.';
                   if (int.tryParse(value) == null || int.parse(value) < 0) return 'Insira um número válido.';
                   return null;
                 },
@@ -331,22 +345,55 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                           final productName = productData['name'] ?? 'Nome indisponível';
                           final imageUrl = productData['imageUrl'] as String?;
                           final quantity = productData['quantity'] ?? 0;
+                          final minimumStock = productData['minimumStock'] as int? ?? 0;
+
+                            // 2. Crie a condição de alerta.
+                            //    (Opcional: `&& quantity > 0` para não alertar sobre itens já esgotados)
+                          final bool needsRestock = quantity <= minimumStock;
 
                           return Card(
-                            color: Theme.of(context).cardColor.withOpacity(0.9),
+                            // Cor do card alterada para preto quando o alerta está ativo
+                            color: needsRestock
+                                ? Colors.black.withOpacity(0.85)
+                                : Theme.of(context).cardColor.withOpacity(0.9),
+
+                            // A borda colorida se destacará ainda mais sobre o fundo preto
+                            shape: needsRestock
+                                ? RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.redAccent, width: 1.5),
+                              borderRadius: BorderRadius.circular(12),
+                            )
+                                : null,
+
                             margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
                             child: ListTile(
                               leading: CircleAvatar(
                                 radius: 30,
                                 backgroundColor: Colors.grey.shade300,
                                 backgroundImage: (imageUrl != null && imageUrl.isNotEmpty) ? NetworkImage(imageUrl) : null,
-                                child: (imageUrl == null || imageUrl.isEmpty) ? const Icon(Icons.ac_unit, color: Colors.white70) : null,
+                                child: (imageUrl == null || imageUrl.isEmpty) ? const Icon(Icons.inventory_2_outlined, color: Colors.white70) : null,
                               ),
                               title: Text(productName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text('R\$ ${price.toStringAsFixed(2)} | Em estoque: $quantity'),
+
+                              subtitle: Text(
+                                // Lógica para mostrar o texto completo apenas no alerta
+                                needsRestock
+                                    ? 'Em estoque: $quantity (Mín: $minimumStock)' // Texto completo no alerta
+                                    : 'Em estoque: $quantity', // Texto simples se o estoque estiver OK
+
+                                style: TextStyle(
+                                  color: needsRestock ? Colors.amber.shade900 : null,
+                                  fontWeight: needsRestock ? FontWeight.w600 : FontWeight.normal,
+                                ),
+                              ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  if (needsRestock)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 8.0),
+                                      child: Icon(Icons.warning_amber_rounded, color: Colors.redAccent), // Ícone do alerta
+                                    ),
                                   IconButton(
                                     icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
                                     onPressed: () => _showProductDialog(context, product: productDocument),

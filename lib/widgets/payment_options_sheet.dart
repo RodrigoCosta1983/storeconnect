@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tienda_model/models/customer_model.dart';
 import 'package:tienda_model/widgets/confirm_fiado_dialog.dart';
 
@@ -18,6 +19,22 @@ class PaymentOptionsSheet extends StatefulWidget {
 
 class _PaymentOptionsSheetState extends State<PaymentOptionsSheet> {
   var _isLoading = false;
+  bool _fiadoIsEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFiadoPreference();
+  }
+
+  Future<void> _loadFiadoPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _fiadoIsEnabled = prefs.getBool('fiado_enabled') ?? false;
+      });
+    }
+  }
 
   // Função para lidar com vendas à vista e dar feedback ao usuário
   Future<void> _handleInstantSale(String paymentMethod) async {
@@ -182,12 +199,15 @@ class _PaymentOptionsSheetState extends State<PaymentOptionsSheet> {
             title: const Text('PIX', style: TextStyle(fontSize: 18)),
             onTap: _showPixDialog,
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.person_add_alt_1, size: 30, color: Colors.orange),
-            title: const Text('Fiado / A Prazo', style: TextStyle(fontSize: 18)),
-            onTap: _showCustomerSelectionDialog,
-          ),
+
+          if (_fiadoIsEnabled) ...[
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.person_add_alt_1, size: 30, color: Colors.orange),
+              title: const Text('Fiado / A Prazo', style: TextStyle(fontSize: 18)),
+              onTap: _showCustomerSelectionDialog,
+            ),
+          ],
         ],
       ),
     );

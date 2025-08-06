@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:tienda_model/screens/settings_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/product_model.dart';
@@ -130,6 +131,21 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               },
             ),
             const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined), // Ícone de engrenagem
+              title: const Text('Configurações'),
+              onTap: () {
+                // 1. Fecha o menu lateral para uma transição suave
+                Navigator.of(context).pop();
+
+                // 2. Navega para a nova tela de configurações
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
+                );
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: const Text("Sobre"),
