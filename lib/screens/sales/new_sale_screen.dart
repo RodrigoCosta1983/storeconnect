@@ -12,6 +12,7 @@ import '../cart/cart_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../management/manage_customers_screen.dart';
 import '../management/manage_products_screen.dart';
+import '../reports/abc_report_screen.dart';
 import '../sales/sales_history_screen.dart';
 
 class NewSaleScreen extends StatefulWidget {
@@ -106,6 +107,16 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (ctx) => const SalesHistoryScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.analytics_outlined),
+              title: const Text('Relatórios'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (ctx) => const AbcReportScreen()),
                 );
               },
             ),

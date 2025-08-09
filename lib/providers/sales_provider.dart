@@ -1,13 +1,16 @@
+// lib/providers/sales_provider.dart
+
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/abc_product_model.dart'; // Importa o modelo ABC
 import '../models/customer_model.dart';
 import '../providers/cart_provider.dart';
 import './cash_flow_provider.dart';
 
 class SalesProvider with ChangeNotifier {
-
+  // SUAS FUNÇÕES EXISTENTES (addOrder, addInstantSale, markOrderAsPaid)
   Future<void> addOrder({
     required List<CartItem> cartProducts,
     required double total,
@@ -23,7 +26,6 @@ class SalesProvider with ChangeNotifier {
     final firestore = FirebaseFirestore.instance;
 
     await firestore.runTransaction((transaction) async {
-      // FASE 1: LEITURA E VALIDAÇÃO
       final List<Map<String, dynamic>> productsToUpdate = [];
       for (var cartItem in cartProducts) {
         final productDocRef = firestore.collection('users').doc(userId).collection('products').doc(cartItem.id);
@@ -44,7 +46,6 @@ class SalesProvider with ChangeNotifier {
         });
       }
 
-      // FASE 2: ESCRITA
       for (var productUpdate in productsToUpdate) {
         transaction.update(productUpdate['ref'], {'quantity': productUpdate['newQuantity']});
       }
@@ -85,7 +86,6 @@ class SalesProvider with ChangeNotifier {
     final firestore = FirebaseFirestore.instance;
 
     await firestore.runTransaction((transaction) async {
-      // FASE 1: LEITURA E VALIDAÇÃO
       final List<Map<String, dynamic>> productsToUpdate = [];
       for (var cartItem in cartProducts) {
         final productDocRef = firestore.collection('users').doc(userId).collection('products').doc(cartItem.id);
@@ -106,7 +106,6 @@ class SalesProvider with ChangeNotifier {
         });
       }
 
-      // FASE 2: ESCRITA
       for (var productUpdate in productsToUpdate) {
         transaction.update(productUpdate['ref'], {'quantity': productUpdate['newQuantity']});
       }
@@ -144,10 +143,78 @@ class SalesProvider with ChangeNotifier {
         'isPaid': true,
       });
       cashFlow.addIncome(orderAmount);
-      print('Pedido $orderId marcado como pago no Firestore.');
     } catch (error) {
-      print('Erro ao marcar como pago: $error');
       throw error;
     }
+  }
+
+  // --- NOVA FUNÇÃO DE ANÁLISE ABC ---
+  Future<List<AbcProduct>> calculateAbcAnalysis({DateTime? startDate}) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
+
+    final firestore = FirebaseFirestore.instance;
+
+    Query salesQuery = firestore.collection('users').doc(user.uid).collection('sales');
+
+    if (startDate != null) {
+      salesQuery = salesQuery.where('date', isGreaterThanOrEqualTo: startDate);
+    }
+
+    final salesSnapshot = await salesQuery.get();
+    if (salesSnapshot.docs.isEmpty) return [];
+
+    final Map<String, AbcProduct> productPerformance = {};
+    double totalRevenueAllProducts = 0;
+
+    for (var saleDoc in salesSnapshot.docs) {
+      final saleData = saleDoc.data() as Map<String, dynamic>;
+      final List<dynamic> items = saleData['products'] ?? [];
+
+      for (var item in items) {
+        final productId = item['productId'];
+        final productName = item['name'];
+        final quantity = item['quantity'] as int;
+        final price = item['price'] as num;
+        final revenue = quantity * price;
+
+        totalRevenueAllProducts += revenue;
+
+        productPerformance.update(
+          productId,
+              (existingProduct) {
+            existingProduct.totalRevenue += revenue;
+            existingProduct.totalQuantity += quantity;
+            return existingProduct;
+          },
+          ifAbsent: () => AbcProduct(
+            productId: productId,
+            productName: productName,
+            totalRevenue: revenue.toDouble(),
+            totalQuantity: quantity,
+          ),
+        );
+      }
+    }
+
+    if (totalRevenueAllProducts == 0) return [];
+
+    final sortedProducts = productPerformance.values.toList()
+      ..sort((a, b) => b.totalRevenue.compareTo(a.totalRevenue));
+
+    double cumulativePercentage = 0;
+    for (var product in sortedProducts) {
+      product.percentageOfTotal = (product.totalRevenue / totalRevenueAllProducts) * 100;
+      cumulativePercentage += product.percentageOfTotal;
+
+      if (cumulativePercentage <= 80) {
+        product.classification = 'A';
+      } else if (cumulativePercentage <= 95) {
+        product.classification = 'B';
+      } else {
+        product.classification = 'C';
+      }
+    }
+    return sortedProducts;
   }
 }
