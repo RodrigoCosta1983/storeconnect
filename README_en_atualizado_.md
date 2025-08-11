@@ -42,6 +42,11 @@ O principal objetivo é fornecer ao proprietário do negócio uma ferramenta pod
   * **Configuração Simples:** Ativado/desativado pelo dono da loja.
   * **Fluxo Completo:** Registro de vendas a prazo, com cliente e vencimento.
   * **Controle de Pagamentos:** Marcar contas como pagas, atualizando o caixa.
+* **✨ Emissão de Recibos em PDF:**
+  * **Geração Profissional:** Crie recibos em PDF detalhados para qualquer venda diretamente do histórico.
+  * **Informações Completas:** O recibo inclui dados do vendedor, do cliente, lista de produtos com valores, total e **data de vencimento (para vendas a prazo)**.
+  * **Compartilhamento Fácil:** Use a função de compartilhamento nativa do celular para enviar o PDF via WhatsApp, E-mail, etc.
+
 * **Múltiplos Meios de Pagamento:** Dinheiro, Cartão e PIX.
 * **Histórico de Vendas Detalhado:** Lista de todas as vendas salvas no Firestore, com filtros e detalhes expansíveis.
 * **Alertas Visuais:** O histórico destaca automaticamente vendas vencidas e não pagas.
@@ -72,7 +77,9 @@ O principal objetivo é fornecer ao proprietário do negócio uma ferramenta pod
 * **UI Reativa:** O aplicativo foi construído em torno do widget **`StreamBuilder`**, permitindo que a interface reaja e se atualize instantaneamente a qualquer mudança nos dados do Firestore.
 * **Bibliotecas Adicionais Notáveis:**
   * **`fl_chart`**: Para a criação dos gráficos dinâmicos.
+  * **`shared_preferences`**: Para salvar as configurações locais do app.
   * **`image_picker`**: Para a seleção de imagens da galeria.
+  * **`pdf`** e **`printing`**: Para criar, visualizar e compartilhar recibos em PDF.
   * **`intl`**, **`package_info_plus`**, **`url_launcher`**.
 
 <hr>
@@ -156,6 +163,10 @@ The main objective is to provide business owners with a powerful tool for managi
   * **Simple Configuration:** Can be enabled/disabled by the store owner.
   * **Complete Flow:** Register installment/credit sales with customer and due date.
   * **Payment Control:** Mark accounts as paid, updating the cash register.
+* **✨ PDF Receipt Issuance:**
+  * **Professional Generation:** Create detailed PDF receipts for any sale directly from the history.
+  * **Complete Information:** The receipt includes seller and customer details, product list with prices, total amount, and **due date (for credit sales)**.
+  * **Easy Sharing:** Use the phone’s native sharing function to send the PDF via WhatsApp, Email, etc.
 * **Multiple Payment Methods:** Cash, Card, and PIX.
 * **Detailed Sales History:** List of all sales saved in Firestore, with filters and expandable details.
 * **Visual Alerts:** The history automatically highlights overdue and unpaid sales.
