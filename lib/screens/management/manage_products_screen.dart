@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart'; // Importante para o 'kIsWeb'
+import 'dart:typed_data'; // Importante para os bytes da imagem na web
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,11 +20,13 @@ class _ProductDialogState extends State<_ProductDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
-  final _quantityController = TextEditingController(); // Controller para quantidade
+  final _quantityController = TextEditingController();
   final _minimumStockController = TextEditingController();
   var _isLoading = false;
 
-  File? _selectedImageFile;
+  // Variáveis de estado para a imagem (Multiplataforma)
+  File? _selectedImageFile; // Para mobile (Android/iOS)
+  Uint8List? _selectedImageBytes; // Para Web
   String? _existingImageUrl;
 
   bool get _isEditing => widget.product != null;
@@ -42,16 +46,44 @@ class _ProductDialogState extends State<_ProductDialog> {
     }
   }
 
+  // Lógica de seleção de imagem (Multiplataforma)
   Future<void> _pickImage() async {
     final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 50, maxWidth: 600);
     if (pickedImage == null) return;
-    setState(() {
+
+    if (kIsWeb) {
+      _selectedImageBytes = await pickedImage.readAsBytes();
+    } else {
       _selectedImageFile = File(pickedImage.path);
-    });
+    }
+    setState(() {});
   }
 
+  // Lógica para salvar o produto (Multiplataforma)
   Future<void> _saveProduct() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Verificação anti-duplicidade (somente ao criar)
+    if (!_isEditing) {
+      final user = FirebaseAuth.instance.currentUser!;
+      final name = _nameController.text;
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('users').doc(user.uid)
+          .collection('products')
+          .where('name_lowercase', isEqualTo: name.toLowerCase())
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro: Um produto com o nome "$name" já existe.'), backgroundColor: Colors.red),
+          );
+        }
+        return;
+      }
+    }
+
     setState(() => _isLoading = true);
 
     final user = FirebaseAuth.instance.currentUser;
@@ -67,9 +99,14 @@ class _ProductDialogState extends State<_ProductDialog> {
     String imageUrl = _existingImageUrl ?? '';
 
     try {
-      if (_selectedImageFile != null) {
+      if (_selectedImageFile != null || _selectedImageBytes != null) {
         final ref = FirebaseStorage.instance.ref().child('product_images').child(user.uid).child('${DateTime.now().toIso8601String()}.jpg');
-        await ref.putFile(_selectedImageFile!);
+
+        if (kIsWeb) {
+          await ref.putData(_selectedImageBytes!);
+        } else {
+          await ref.putFile(_selectedImageFile!);
+        }
         imageUrl = await ref.getDownloadURL();
       }
 
@@ -77,21 +114,16 @@ class _ProductDialogState extends State<_ProductDialog> {
         'name': name,
         'name_lowercase': name.toLowerCase(),
         'price': price,
-        'quantity': quantity, // Adiciona a quantidade aos dados a serem salvos
+        'quantity': quantity,
         'minimumStock': minimumStock,
         'imageUrl': imageUrl,
       };
 
       if (_isEditing) {
-        await FirebaseFirestore.instance
-            .collection('users').doc(user.uid)
-            .collection('products').doc(widget.product!.id)
-            .update(productData);
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).collection('products').doc(widget.product!.id).update(productData);
       } else {
         productData['createdAt'] = Timestamp.now();
-        await FirebaseFirestore.instance
-            .collection('users').doc(user.uid)
-            .collection('products').add(productData);
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).collection('products').add(productData);
       }
 
       if (mounted) Navigator.of(context).pop();
@@ -111,11 +143,22 @@ class _ProductDialogState extends State<_ProductDialog> {
     _nameController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
+    _minimumStockController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Lógica para decidir qual imagem mostrar na UI
+    ImageProvider? provider;
+    if (_selectedImageBytes != null) {
+      provider = MemoryImage(_selectedImageBytes!);
+    } else if (_selectedImageFile != null) {
+      provider = FileImage(_selectedImageFile!);
+    } else if (_existingImageUrl != null && _existingImageUrl!.isNotEmpty) {
+      provider = NetworkImage(_existingImageUrl!);
+    }
+
     return AlertDialog(
       title: Text(_isEditing ? 'Editar Produto' : 'Adicionar Novo Produto'),
       content: Form(
@@ -127,12 +170,8 @@ class _ProductDialogState extends State<_ProductDialog> {
               CircleAvatar(
                 radius: 40,
                 backgroundColor: Colors.grey.shade200,
-                backgroundImage: _selectedImageFile != null
-                    ? FileImage(_selectedImageFile!)
-                    : (_existingImageUrl != null && _existingImageUrl!.isNotEmpty
-                    ? NetworkImage(_existingImageUrl!)
-                    : null) as ImageProvider?,
-                child: (_selectedImageFile == null && (_existingImageUrl == null || _existingImageUrl!.isEmpty))
+                backgroundImage: provider,
+                child: (provider == null)
                     ? const Icon(Icons.inventory_2, size: 40, color: Colors.grey)
                     : null,
               ),
@@ -196,7 +235,7 @@ class _ProductDialogState extends State<_ProductDialog> {
   }
 }
 
-// A tela principal de gerenciamento de produtos
+// A tela principal de gerenciamento de produtos (sem alterações aqui)
 class ManageProductsScreen extends StatefulWidget {
   const ManageProductsScreen({super.key});
 
@@ -344,27 +383,21 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                           final price = productData.containsKey('price') ? productData['price'] as num : 0.0;
                           final productName = productData['name'] ?? 'Nome indisponível';
                           final imageUrl = productData['imageUrl'] as String?;
-                          final quantity = productData['quantity'] ?? 0;
+                          final quantity = productData['quantity'] as int? ?? 0;
                           final minimumStock = productData['minimumStock'] as int? ?? 0;
 
-                            // 2. Crie a condição de alerta.
-                            //    (Opcional: `&& quantity > 0` para não alertar sobre itens já esgotados)
                           final bool needsRestock = quantity <= minimumStock;
 
                           return Card(
-                            // Cor do card alterada para preto quando o alerta está ativo
                             color: needsRestock
                                 ? Colors.black.withOpacity(0.85)
                                 : Theme.of(context).cardColor.withOpacity(0.9),
-
-                            // A borda colorida se destacará ainda mais sobre o fundo preto
                             shape: needsRestock
                                 ? RoundedRectangleBorder(
                               side: BorderSide(color: Colors.redAccent, width: 1.5),
                               borderRadius: BorderRadius.circular(12),
                             )
                                 : null,
-
                             margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
                             child: ListTile(
                               leading: CircleAvatar(
@@ -374,13 +407,10 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                                 child: (imageUrl == null || imageUrl.isEmpty) ? const Icon(Icons.inventory_2_outlined, color: Colors.white70) : null,
                               ),
                               title: Text(productName, style: const TextStyle(fontWeight: FontWeight.bold)),
-
                               subtitle: Text(
-                                // Lógica para mostrar o texto completo apenas no alerta
                                 needsRestock
-                                    ? 'Em estoque: $quantity (Mín: $minimumStock)' // Texto completo no alerta
-                                    : 'Em estoque: $quantity', // Texto simples se o estoque estiver OK
-
+                                    ? 'Em estoque: $quantity (Mín: $minimumStock)'
+                                    : 'Em estoque: $quantity',
                                 style: TextStyle(
                                   color: needsRestock ? Colors.amber.shade900 : null,
                                   fontWeight: needsRestock ? FontWeight.w600 : FontWeight.normal,
@@ -392,7 +422,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                                   if (needsRestock)
                                     Padding(
                                       padding: const EdgeInsets.only(right: 8.0),
-                                      child: Icon(Icons.warning_amber_rounded, color: Colors.redAccent), // Ícone do alerta
+                                      child: Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
                                     ),
                                   IconButton(
                                     icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),

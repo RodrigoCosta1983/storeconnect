@@ -1,10 +1,9 @@
-// lib/providers/sales_provider.dart
-
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../models/abc_product_model.dart'; // Importa o modelo ABC
+import '../models/abc_product_model.dart';
+import '../models/customer_performance_model.dart'; // Importa o novo modelo
 import '../models/customer_model.dart';
 import '../providers/cart_provider.dart';
 import './cash_flow_provider.dart';
@@ -148,7 +147,7 @@ class SalesProvider with ChangeNotifier {
     }
   }
 
-  // --- NOVA FUNÇÃO DE ANÁLISE ABC ---
+  // --- FUNÇÃO DE ANÁLISE ABC DE PRODUTOS ---
   Future<List<AbcProduct>> calculateAbcAnalysis({DateTime? startDate}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return [];
@@ -216,5 +215,62 @@ class SalesProvider with ChangeNotifier {
       }
     }
     return sortedProducts;
+  }
+
+  // --- NOVA FUNÇÃO DE ANÁLISE DE CLIENTES ---
+  Future<List<CustomerPerformance>> calculateCustomerPerformance({DateTime? startDate}) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
+
+    final firestore = FirebaseFirestore.instance;
+    Query salesQuery = firestore.collection('users').doc(user.uid).collection('sales');
+
+    if (startDate != null) {
+      salesQuery = salesQuery.where('date', isGreaterThanOrEqualTo: startDate);
+    }
+
+    final salesSnapshot = await salesQuery.get();
+    if (salesSnapshot.docs.isEmpty) return [];
+
+    final Map<String, CustomerPerformance> customerPerformanceMap = {};
+
+    for (var saleDoc in salesSnapshot.docs) {
+      final saleData = saleDoc.data() as Map<String, dynamic>;
+
+      if (saleData['customerId'] == null || saleData['customerName'] == null) {
+        continue;
+      }
+
+      final customerId = saleData['customerId'];
+      final customerName = saleData['customerName'];
+      final amount = (saleData['amount'] as num).toDouble();
+      final isPaid = saleData['isPaid'] as bool;
+      final saleDate = (saleData['date'] as Timestamp).toDate();
+
+      customerPerformanceMap.update(
+        customerId,
+            (existingCustomer) {
+          existingCustomer.totalAmountPurchased += amount;
+          existingCustomer.purchaseCount++;
+          if (!isPaid) {
+            existingCustomer.pendingAmount += amount;
+          }
+          if (saleDate.isAfter(existingCustomer.lastPurchaseDate)) {
+            existingCustomer.lastPurchaseDate = saleDate;
+          }
+          return existingCustomer;
+        },
+        ifAbsent: () => CustomerPerformance(
+          customerId: customerId,
+          customerName: customerName,
+          totalAmountPurchased: amount,
+          pendingAmount: isPaid ? 0 : amount,
+          purchaseCount: 1,
+          lastPurchaseDate: saleDate,
+        ),
+      );
+    }
+
+    return customerPerformanceMap.values.toList();
   }
 }

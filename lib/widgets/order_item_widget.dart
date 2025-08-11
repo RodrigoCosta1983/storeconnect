@@ -4,16 +4,33 @@ import 'package:provider/provider.dart';
 import '../models/sale_order_model.dart';
 import '../providers/cash_flow_provider.dart';
 import '../providers/sales_provider.dart';
+import '../services/pdf_receipt_service.dart'; // Importa nosso serviço de PDF
 
 class OrderItemWidget extends StatelessWidget {
   final SaleOrder order;
   const OrderItemWidget({super.key, required this.order});
 
+  // Função para chamar o serviço de PDF
+  Future<void> _generatePdf(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      await PdfReceiptService().generateAndShareReceipt(order);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao gerar PDF: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      Navigator.of(context).pop(); // Fecha o indicador de loading
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // A lógica de vencimento agora só se aplica se houver uma data de vencimento
     final bool isOverdue = !order.isPaid && order.dueDate != null && order.dueDate!.isBefore(DateTime.now());
-
     final salesProvider = Provider.of<SalesProvider>(context, listen: false);
     final cashFlowProvider = Provider.of<CashFlowProvider>(context, listen: false);
 
@@ -28,8 +45,6 @@ class OrderItemWidget extends StatelessWidget {
       child: ExpansionTile(
         key: PageStorageKey(order.id),
         title: Text('R\$ ${order.amount.toStringAsFixed(2)}'),
-        // --- MUDANÇA AQUI ---
-        // Exibe o nome do cliente ou o método de pagamento
         subtitle: Text(
           order.customer != null
               ? 'Cliente: ${order.customer!.name}'
@@ -47,8 +62,6 @@ class OrderItemWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- MUDANÇA AQUI ---
-                // Só mostra a data de vencimento se ela existir (vendas fiado)
                 if (order.dueDate != null)
                   Row(
                     children: [
@@ -81,24 +94,36 @@ class OrderItemWidget extends StatelessWidget {
                   ),
                 ).toList(),
 
-                if (!order.isPaid && order.customer != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.check),
-                        label: const Text('Marcar como Pago'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () {
-                          salesProvider.markOrderAsPaid(order.id, order.amount, cashFlowProvider);
-                        },
+                // --- BOTÕES DE AÇÃO ---
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Row(
+                    children: [
+                      // Botão para gerar o recibo
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.picture_as_pdf_outlined),
+                        label: const Text('Recibo'),
+                        onPressed: () => _generatePdf(context),
                       ),
-                    ),
+
+                      const Spacer(), // Adiciona um espaço flexível
+
+                      // Botão para marcar como pago (só aparece se for fiado)
+                      if (!order.isPaid && order.customer != null)
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.check),
+                          label: const Text('Marcar como Pago'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            salesProvider.markOrderAsPaid(order.id, order.amount, cashFlowProvider);
+                          },
+                        ),
+                    ],
                   ),
+                ),
               ],
             ),
           )

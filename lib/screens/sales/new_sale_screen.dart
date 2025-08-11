@@ -13,6 +13,8 @@ import '../dashboard/dashboard_screen.dart';
 import '../management/manage_customers_screen.dart';
 import '../management/manage_products_screen.dart';
 import '../reports/abc_report_screen.dart';
+import '../reports/customer_report_screen.dart';
+import '../reports/reports_hub_screen.dart';
 import '../sales/sales_history_screen.dart';
 
 class NewSaleScreen extends StatefulWidget {
@@ -112,11 +114,11 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.analytics_outlined),
-              title: const Text('Relatórios'),
+              title: const Text('Análises e Relatórios'),
               onTap: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Fecha o drawer
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (ctx) => const AbcReportScreen()),
+                  MaterialPageRoute(builder: (ctx) => const ReportsHubScreen()),
                 );
               },
             ),
@@ -141,6 +143,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                 );
               },
             ),
+
+
             const Divider(),
             ListTile(
               leading: const Icon(Icons.settings_outlined), // Ícone de engrenagem
