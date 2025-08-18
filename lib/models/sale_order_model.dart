@@ -7,54 +7,53 @@ class SaleOrder {
   final double amount;
   final List<CartItem> products;
   final DateTime date;
-  final Customer? customer; // <-- Torna o cliente opcional (pode ser nulo)
-  final DateTime? dueDate;    // <-- Torna a data de vencimento opcional
-  final String? notes;
+  final Customer? customer;
+  final DateTime? dueDate;
   final String paymentMethod;
-  bool isPaid;
+  final bool isPaid;
+  final String? notes; // Corrigido: Declarado apenas uma vez
 
   SaleOrder({
     required this.id,
     required this.amount,
     required this.products,
     required this.date,
-    this.customer, // <-- Agora é opcional
-    this.dueDate,    // <-- Agora é opcional
-    this.notes,
+    this.customer,
+    this.dueDate,
     required this.paymentMethod,
-    this.isPaid = false,
+    required this.isPaid,
+    this.notes, // Corrigido: Incluído apenas uma vez
   });
 
   // Construtor que cria um SaleOrder a partir de um documento do Firestore
-  factory SaleOrder.fromSnapshot(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory SaleOrder.fromSnapshot(DocumentSnapshot snapshot) {
+    final data = snapshot.data() as Map<String, dynamic>;
+
+    // Lógica para converter a lista de produtos do Firestore para uma lista de CartItem
+    final List<CartItem> loadedProducts = (data['products'] as List<dynamic>? ?? [])
+        .map((item) {
+      // Criando um CartItem a partir do mapa de cada produto
+      return CartItem(
+        id: item['productId'],
+        name: item['name'],
+        quantity: item['quantity'],
+        price: (item['price'] as num).toDouble(),
+      );
+    })
+        .toList();
+
     return SaleOrder(
-      id: doc.id,
+      id: snapshot.id,
       amount: (data['amount'] as num).toDouble(),
-      products: (data['products'] as List<dynamic>).map((item) {
-        return CartItem(
-          id: item['productId'],
-          name: item['name'],
-          quantity: item['quantity'],
-          price: (item['price'] as num).toDouble(),
-        );
-      }).toList(),
+      products: loadedProducts,
       date: (data['date'] as Timestamp).toDate(),
-      // Verifica se existe um cliente antes de criá-lo
-      customer: data.containsKey('customerId')
-          ? Customer(
-        id: data['customerId'],
-        name: data['customerName'],
-        phone: '',
-      )
+      customer: data['customerId'] != null
+          ? Customer(id: data['customerId'], name: data['customerName'], phone: data['customerPhone'] ?? '')
           : null,
-      // Verifica se existe uma data de vencimento antes de convertê-la
-      dueDate: data.containsKey('dueDate')
-          ? (data['dueDate'] as Timestamp).toDate()
-          : null,
-      notes: data['notes'],
-      paymentMethod: data['paymentMethod'] ?? 'N/A',
-      isPaid: data['isPaid'],
+      dueDate: data['dueDate'] != null ? (data['dueDate'] as Timestamp).toDate() : null,
+      isPaid: data['isPaid'] ?? false,
+      paymentMethod: data['paymentMethod'] ?? 'N/D',
+      notes: data['notes'] as String?,
     );
   }
 }

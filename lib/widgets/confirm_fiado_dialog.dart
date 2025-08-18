@@ -7,10 +7,12 @@ import '../providers/sales_provider.dart';
 
 class ConfirmFiadoDialog extends StatefulWidget {
   final Customer customer;
+  final String notes;
 
   const ConfirmFiadoDialog({
     super.key,
     required this.customer,
+    required this.notes,
   });
 
   @override
@@ -85,12 +87,15 @@ class _ConfirmFiadoDialogState extends State<ConfirmFiadoDialog> {
 
             final salesProvider = Provider.of<SalesProvider>(context, listen: false);
 
+
+
             try {
               await salesProvider.addOrder(
                 cartProducts: cart.items.values.toList(),
                 total: cart.totalAmount,
                 customer: widget.customer,
                 dueDate: _selectedDate!,
+                notes: widget.notes,
               );
 
               // Se a venda for um sucesso:

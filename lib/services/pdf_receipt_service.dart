@@ -32,6 +32,8 @@ class PdfReceiptService {
   }
 
   pw.Widget _buildPdfContent(SaleOrder order, Map<String, dynamic> sellerData) {
+    final notes = order.notes;
+
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -55,6 +57,18 @@ class PdfReceiptService {
         pw.SizedBox(height: 10),
         pw.Text('Cliente: ${order.customer?.name ?? 'Consumidor Final'}'),
         pw.Divider(),
+        if (notes != null && notes.isNotEmpty)
+          pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 10),
+              child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('Observações:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                    pw.Text(notes),
+                    pw.Divider(),
+                  ]
+              )
+          ),
         pw.SizedBox(height: 20),
 
         // Tabela de Itens (sem alterações)

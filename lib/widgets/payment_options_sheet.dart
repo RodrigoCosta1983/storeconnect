@@ -11,7 +11,8 @@ import '../providers/cash_flow_provider.dart';
 import '../providers/sales_provider.dart';
 
 class PaymentOptionsSheet extends StatefulWidget {
-  const PaymentOptionsSheet({super.key});
+  final String notes;
+  const PaymentOptionsSheet({super.key, required this.notes});
 
   @override
   State<PaymentOptionsSheet> createState() => _PaymentOptionsSheetState();
@@ -52,6 +53,7 @@ class _PaymentOptionsSheetState extends State<PaymentOptionsSheet> {
         total: cart.totalAmount,
         paymentMethod: paymentMethod,
         cashFlow: cashFlow,
+        notes: widget.notes,
       );
       cart.clear();
       if (mounted) {
@@ -108,7 +110,7 @@ class _PaymentOptionsSheetState extends State<PaymentOptionsSheet> {
     );
   }
 
-  void _showCustomerSelectionDialog() {
+  void _showCustomerSelectionDialog(String notes) {
     // Fecha o painel de opções antes de abrir o diálogo de clientes
     Navigator.of(context).pop();
 
@@ -142,14 +144,43 @@ class _PaymentOptionsSheetState extends State<PaymentOptionsSheet> {
                       name: customerData['name'] ?? 'Sem nome',
                       phone: customerData['phone'] ?? '',
                     );
+
+                    print('RASTREAMENTO 1 - ID na seleção: ${customer.id}');
+
                     return ListTile(
                       title: Text(customer.name),
+                      // DENTRO DE _showCustomerSelectionDialog
+
                       onTap: () {
+                        final customer = Customer(
+                          id: customersDocs[index].id,
+                          name: customerData['name'] ?? 'Sem nome',
+                          phone: customerData['phone'] ?? '',
+                        );
+                        print('RASTREAMENTO 1 - ID na seleção: ${customer.id}');
+
+                        // 1. Primeiro, mandamos fechar o diálogo atual.
                         Navigator.of(ctx).pop();
                         showDialog(
                           context: context,
-                          builder: (context) => ConfirmFiadoDialog(customer: customer),
+                          // Passe o cliente E as 'notes'
+                          builder: (context) => ConfirmFiadoDialog(customer: customer, notes: notes),
                         );
+
+                        // 2. Em seguida, agendamos a abertura do novo diálogo para DEPOIS
+                        // que a renderização atual (o 'pop') terminar.
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          // Verificação de segurança para garantir que a tela ainda existe
+                          if (context.mounted) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => ConfirmFiadoDialog(
+                                customer: customer,
+                                notes: notes, // <-- Adicione este argumento
+                              ),
+                            );
+                          }
+                        });
                       },
                     );
                   },
@@ -205,7 +236,7 @@ class _PaymentOptionsSheetState extends State<PaymentOptionsSheet> {
             ListTile(
               leading: const Icon(Icons.person_add_alt_1, size: 30, color: Colors.orange),
               title: const Text('Fiado / A Prazo', style: TextStyle(fontSize: 18)),
-              onTap: _showCustomerSelectionDialog,
+              onTap: () => _showCustomerSelectionDialog(widget.notes),
             ),
           ],
         ],
