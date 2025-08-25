@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "527743404730",
-    "project_id": "gelo-gestor",
-    "storage_bucket": "gelo-gestor.firebasestorage.app"
+    "project_number": "748597312243",
+    "project_id": "storeconnect-76e73",
+    "storage_bucket": "storeconnect-76e73.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:527743404730:android:145db77c98420e35999083",
+        "mobilesdk_app_id": "1:748597312243:android:d65dc47898fa8f2358d586",
         "android_client_info": {
-          "package_name": "com.rodrigocostadev.tienda_model"
+          "package_name": "com.rodrigocostadev.master_gelo"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAwUcOG3AauevpximLGMZK7r_j48_IBzE4"
+          "current_key": "AIzaSyBkaPSk4oX37wF4sUCwBzqKvgW503wMDVQ"
         }
       ],
       "services": {
