@@ -665,7 +665,7 @@
       "name": "master_gelo",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.2"
     }
   ],
   "generator": "pub",

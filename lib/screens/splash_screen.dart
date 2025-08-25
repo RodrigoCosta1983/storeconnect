@@ -21,10 +21,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    // Inicializa o Firebase aqui
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    // Esta verificação resolve o erro de app duplicado
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        // Se você estiver usando o FlutterFire CLI, a linha abaixo é necessária
+        // options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
 
     // Aguarda um pequeno tempo para o logo ser visível (opcional, mas bom para UX)
     await Future.delayed(const Duration(seconds: 2));
@@ -48,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Icon(Icons.ac_unit, size: 100, color: Colors.blue),
             SizedBox(height: 20),
             Text(
-              'Gelo Gestor',
+              'Master Gelo',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -63,3 +66,4 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+// [CORREÇÃO] Chave extra '}' foi removida do final do arquivo

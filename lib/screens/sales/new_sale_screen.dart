@@ -90,7 +90,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
           children: [
             const DrawerHeader(
               decoration: BoxDecoration(color: Colors.blue),
-              child: Text('Gelo Gestor', style: TextStyle(color: Colors.white, fontSize: 24)),
+              child: Text('Master Gelo', style: TextStyle(color: Colors.white, fontSize: 24)),
             ),
             ListTile(
               leading: const Icon(Icons.dashboard),
