@@ -1,10 +1,10 @@
 {
   "roots": [
-    "tienda_model"
+    "master_gelo"
   ],
   "packages": [
     {
-      "name": "tienda_model",
+      "name": "master_gelo",
       "version": "1.0.0+2",
       "dependencies": [
         "cloud_firestore",

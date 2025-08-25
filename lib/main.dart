@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (ctx) => CashFlowProvider()),
       ],
       child: MaterialApp(
-        title: 'Gelo Gestor',
+        title: 'Master Gelo',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,

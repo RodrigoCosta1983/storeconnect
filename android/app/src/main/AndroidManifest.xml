@@ -1,7 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.gelo_gestor">
+
+    package="com.rodrigocostadev.master_gelo">
     <application
         android:label="Master Gelo"
+
+    package="com.example.master_gelo">
+    <application
+        android:label="Master Gelo "
+
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

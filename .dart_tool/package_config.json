@@ -662,7 +662,7 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "tienda_model",
+      "name": "master_gelo",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.6"
