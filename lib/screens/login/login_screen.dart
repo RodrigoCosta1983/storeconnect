@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tienda_model/screens/sales/new_sale_screen.dart';
+import 'package:master_gelo/screens/sales/new_sale_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Certifique-se de que os imports estão corretos
 
 class LoginScreen extends StatefulWidget {

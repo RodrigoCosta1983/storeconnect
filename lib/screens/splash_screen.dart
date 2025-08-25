@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tienda_model/firebase_options.dart';
-import 'package:tienda_model/screens/auth/auth_gate.dart';
+import 'package:master_gelo/firebase_options.dart';
+import 'package:master_gelo/screens/auth/auth_gate.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

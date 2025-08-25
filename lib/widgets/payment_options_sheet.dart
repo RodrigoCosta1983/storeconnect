@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tienda_model/models/customer_model.dart';
-import 'package:tienda_model/widgets/confirm_fiado_dialog.dart';
+import 'package:master_gelo/models/customer_model.dart';
+import 'package:master_gelo/widgets/confirm_fiado_dialog.dart';
 
 import '../providers/cart_provider.dart';
 import '../providers/cash_flow_provider.dart';

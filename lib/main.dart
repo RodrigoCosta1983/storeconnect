@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tienda_model/providers/cart_provider.dart';
-import 'package:tienda_model/providers/sales_provider.dart';
-import 'package:tienda_model/providers/cash_flow_provider.dart';
-import 'package:tienda_model/screens/splash_screen.dart'; // Importe a SplashScreen
-import 'package:tienda_model/themes/app_theme.dart';
+import 'package:master_gelo/providers/cart_provider.dart';
+import 'package:master_gelo/providers/sales_provider.dart';
+import 'package:master_gelo/providers/cash_flow_provider.dart';
+import 'package:master_gelo/screens/splash_screen.dart'; // Importe a SplashScreen
+import 'package:master_gelo/themes/app_theme.dart';
 
 // A função main agora fica mais simples
 void main() {

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tienda_model/widgets/payment_options_sheet.dart';
+import 'package:master_gelo/widgets/payment_options_sheet.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/cart_item_widget.dart';
 

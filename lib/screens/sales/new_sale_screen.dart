@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:tienda_model/screens/settings_screen.dart';
+import 'package:master_gelo/screens/settings_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/product_model.dart';
