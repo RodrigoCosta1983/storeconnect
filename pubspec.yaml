@@ -1,8 +1,8 @@
 name: master_gelo
-description: "A new Flutter project."
+description: "!!!"
 publish_to: 'none'
 
-version: 1.0.0+2
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.2.6 <4.0.0' # Recomendação de ajuste para maior compatibilidade
@@ -24,6 +24,7 @@ dependencies:
   shared_preferences: ^2.2.3
   pdf: ^3.10.8
   printing: ^5.12.0
+  mercadopago_sdk: ^1.2.0
 
 dev_dependencies:
   flutter_test:
